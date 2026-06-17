@@ -7,6 +7,7 @@ import 'screens/invite_screen.dart';
 import 'screens/discover_screen.dart';
 import 'screens/timeline_screen.dart';
 import 'screens/initialization_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,7 @@ class TaraletsApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainShell(),
+      home: const LoginScreen(),
     );
   }
 }
