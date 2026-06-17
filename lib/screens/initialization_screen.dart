@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/map_container.dart';
 import '../widgets/alert_modal.dart';
+import '../screens/dashboard_screen.dart';
 
 class InitializationScreen extends StatefulWidget {
   const InitializationScreen({super.key});
@@ -15,6 +16,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
   bool _alertVisible = false;
   String _pinnedLabel = 'Custom Pin';
   bool _pinSet = false;
+  
+  // State para sa Group Coordination Prototype
+  bool _groupSessionVisible = false;
 
   // Controller para sa Group Name
   final TextEditingController _groupNameController = TextEditingController();
@@ -33,8 +37,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
       resizeToAvoidBottomInset: false,
 
       body: GestureDetector(
-        onTap: () =>
-            FocusScope.of(context).unfocus(), // Dismiss keyboard on tap
+        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap
         child: Stack(
           children: [
             // ── 1. Full screen map ──
@@ -233,7 +236,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
                           width: double.infinity,
                           child: GestureDetector(
                             onTap: _pinSet
-                                ? () => _showConfirmSnack(context)
+                                ? () {
+                                    _showConfirmSnack(context);
+                                    setState(() => _groupSessionVisible = true);
+                                  }
                                 : null,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
@@ -305,6 +311,24 @@ class _InitializationScreenState extends State<InitializationScreen> {
                       onDismiss: () => setState(() => _alertVisible = false)),
                 ),
               ),
+
+            // ── 5. GROUP COORDINATION (MODULE 2.0) OVERLAY ──
+            if (_groupSessionVisible)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => setState(() => _groupSessionVisible = false),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Container(color: Colors.black.withOpacity(0.4)),
+                  ),
+                ),
+              ),
+            if (_groupSessionVisible)
+              Positioned.fill(
+                child: Center(
+                  child: _buildGroupCoordinationPrototype(),
+                ),
+              ),
           ],
         ),
       ),
@@ -324,6 +348,287 @@ class _InitializationScreenState extends State<InitializationScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
+    );
+  }
+
+  // ── GROUP COORDINATION PROTOTYPE WIDGETS (UPDATED) ──
+  Widget _buildGroupCoordinationPrototype() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Material(
+        color: Colors.transparent,
+        child: GlassContainer(
+          borderRadius: 16,
+          padding: const EdgeInsets.all(20),
+          color: AppColors.background.withOpacity(0.95), // Clean off-white
+          borderColor: AppColors.cardBorder,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.group_rounded, color: AppColors.primary),
+                  SizedBox(width: 8),
+                  Text(
+                    'Group Coordination',
+                    style: TextStyle(
+                      color: AppColors.charcoal, // Dark blue-gray
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 1. Group Creation Output
+              Text(
+                'Group Name: ${_groupNameController.text.isNotEmpty ? _groupNameController.text : 'Your Group'}',
+                style: const TextStyle(
+                    color: AppColors.charcoal,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    _pinnedLabel,
+                    style: const TextStyle(
+                        color: AppColors.bodyText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              const Divider(height: 24, color: AppColors.divider),
+
+              // 2. Interactive Room Code Generation
+              const Text(
+                'Share Room Code',
+                style: TextStyle(
+                    color: AppColors.captionText,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Room code copied to clipboard! 📋'),
+                      backgroundColor: AppColors.teal,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight, // Highlight color
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      )
+                    ]
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'PHX-92A',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 22,
+                          letterSpacing: 4,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Icon(Icons.copy_rounded, color: AppColors.primary, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 3. Live Member List with Statuses
+              const Text(
+                'Live Member List',
+                style: TextStyle(
+                    color: AppColors.captionText,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              
+              // Host (You)
+              _buildMemberRow(
+                name: 'You (Host)', 
+                status: 'Ready', 
+                icon: Icons.star_rounded, 
+                iconColor: AppColors.starGold,
+                statusColor: AppColors.teal,
+                eta: 'ETA: 15 mins'
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Divider(height: 1, color: AppColors.divider),
+              ),
+              
+              // Member 1 (On the way)
+              _buildMemberRow(
+                name: 'Denanajewaig', 
+                status: 'On the way', 
+                icon: Icons.directions_car_rounded, 
+                iconColor: AppColors.bodyText,
+                statusColor: AppColors.urgent,
+                eta: 'ETA: 22 mins'
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Divider(height: 1, color: AppColors.divider),
+              ),
+              
+              // Member 2 (Waiting)
+              _buildMemberRow(
+                name: 'Waiting for others...', 
+                status: 'Pending', 
+                icon: Icons.more_horiz_rounded, 
+                iconColor: AppColors.captionText,
+                statusColor: AppColors.captionText,
+                eta: '--'
+              ),
+
+              const SizedBox(height: 24),
+
+              // Main CTA: Gradient Button
+              SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: () {
+                    // Logic para mag-start ang sync
+                    setState(() => _groupSessionVisible = false);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, AppColors.secondary],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Start Group Sync',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              
+              // Cancel / Close
+              Center(
+                child: GestureDetector(
+                  onTap: () => setState(() => _groupSessionVisible = false),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: AppColors.bodyText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemberRow({
+    required String name, 
+    required String status, 
+    required IconData icon, 
+    required Color iconColor,
+    required Color statusColor,
+    required String eta,
+  }) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 16,
+          backgroundColor: AppColors.cardBorder,
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  color: AppColors.charcoal,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                eta,
+                style: const TextStyle(
+                  color: AppColors.captionText,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: statusColor.withOpacity(0.3)),
+          ),
+          child: Text(
+            status,
+            style: TextStyle(
+              color: statusColor == AppColors.captionText ? AppColors.bodyText : statusColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
