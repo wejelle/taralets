@@ -10,7 +10,6 @@ class POI {
   final bool isOpen;
   final List<String> preferences;
 
-  // SIGURADUHIN NA NASA LOOB ITO NG CONSTRUCTOR
   const POI({
     required this.id,
     required this.name,
@@ -21,81 +20,87 @@ class POI {
     required this.reviewCount,
     required this.priceRange,
     required this.isOpen,
-    required this.preferences, // <- Ito yung hinahanap ng error
+    required this.preferences,
   });
 
   static const List<POI> mockPOIs = [
     POI(
       id: 'p1',
-      name: 'Eastwood Citywalk',
+      name: 'SM North Sky Garden',
       category: 'Activities',
-      description: 'Open-air lifestyle strip with live performances, street food, and al fresco dining. Perfect for group hangs.',
+      description:
+          'A long elevated walkway with lush greenery, water features, and open-air food stalls. Perfect for a refreshing stroll or barkada meetups.',
       distanceLabel: '0.1 km away',
       rating: 4.5,
-      reviewCount: 1284,
-      priceRange: '₱₱',
+      reviewCount: 3412,
+      priceRange: '₱',
       isOpen: true,
-      preferences: ['Outdoor', 'Nightlife', 'Chill'],
+      preferences: ['Outdoor', 'Chill', 'Scenic'],
     ),
     POI(
       id: 'p2',
-      name: 'Serenitea QC',
+      name: 'Yardstick Coffee - The Block',
       category: 'Cafes',
-      description: 'Popular milk tea chain with cozy seating and customizable drinks. Group orders welcome.',
-      distanceLabel: '0.3 km away',
-      rating: 4.3,
-      reviewCount: 876,
-      priceRange: '₱',
+      description:
+          'Specialty coffee hub featuring smooth espresso blends, aesthetic minimalist vibes, and great pastries. Ideal for catch-ups.',
+      distanceLabel: '0.2 km away',
+      rating: 4.6,
+      reviewCount: 312,
+      priceRange: '₱₱',
       isOpen: true,
-      preferences: ['Drinks', 'Budget', 'Chill'],
+      preferences: ['Drinks', 'Indoor', 'Chill'],
     ),
     POI(
       id: 'p3',
-      name: 'Jollibee Eastwood',
+      name: 'Bake House - Main Mall',
       category: 'Budget',
-      description: 'Iconic Filipino fast food. Affordable, quick, and always a crowd pleaser for barkadas on a budget.',
-      distanceLabel: '0.4 km away',
-      rating: 4.1,
-      reviewCount: 2103,
+      description:
+          'Freshly baked artisanal breads, sweet pastries, and affordable light snacks. Great for a quick group bite.',
+      distanceLabel: '0.3 km away',
+      rating: 4.3,
+      reviewCount: 245,
       priceRange: '₱',
       isOpen: true,
       preferences: ['Food', 'Budget', 'Quick'],
     ),
     POI(
       id: 'p4',
-      name: 'Timezone Eastwood',
+      name: 'Timezone - The Annex',
       category: 'Activities',
-      description: 'Large arcade with the latest games, VR stations, and redemption counters. Great for groups.',
-      distanceLabel: '0.2 km away',
+      description:
+          'Massive arcade area featuring dynamic racing simulators, basketball hoops, karaoke booths, and bowling lanes. Full-on barkada fun.',
+      distanceLabel: '0.4 km away',
       rating: 4.4,
-      reviewCount: 645,
+      reviewCount: 945,
       priceRange: '₱₱',
       isOpen: true,
       preferences: ['Games', 'Indoor', 'Loud'],
     ),
     POI(
       id: 'p5',
-      name: 'Bo\'s Coffee',
+      name: 'Seattle\'s Best Coffee - Sky Garden',
       category: 'Cafes',
-      description: 'Homegrown Philippine specialty coffee. Single-origin brews, pastries, and a calm atmosphere.',
-      distanceLabel: '0.5 km away',
+      description:
+          'Cozy coffee shop overlooking the park area. Great place to wait out the EDSA rush hour with a warm brew.',
+      distanceLabel: '0.1 km away',
       rating: 4.2,
-      reviewCount: 432,
+      reviewCount: 521,
       priceRange: '₱₱',
       isOpen: false,
-      preferences: ['Drinks', 'Chill', 'Indoor'],
+      preferences: ['Drinks', 'Chill', 'Outdoor'],
     ),
     POI(
       id: 'p6',
-      name: 'Mineski Infinity',
+      name: 'Bowlink - City Center',
       category: 'Activities',
-      description: 'Premier esports café with high-end gaming rigs, private rooms, and snack bar. Ideal for gamer crews.',
-      distanceLabel: '0.7 km away',
-      rating: 4.6,
-      reviewCount: 918,
+      description:
+          'Modern bowling alley and recreation spot right inside the mall. Complete with neon lights and snack booths for the ultimate group face-off.',
+      distanceLabel: '0.5 km away',
+      rating: 4.3,
+      reviewCount: 418,
       priceRange: '₱₱',
       isOpen: true,
-      preferences: ['Games', 'Indoor', 'Esports'],
+      preferences: ['Games', 'Sports', 'Indoor'],
     ),
   ];
 }

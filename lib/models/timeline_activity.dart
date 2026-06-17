@@ -21,30 +21,33 @@ class TimelineActivity {
     this.userRating = 0,
   });
 
-  // BAGO: Ginawang mutable variable imbes na static function para pwede madagdagan
+// BAGO: Made a mutable variable instead of a static function for dynamic updates
   static List<TimelineActivity> mockActivitiesList = [
     TimelineActivity(
         id: 'a1',
-        title: 'Meet-up at Eastwood',
-        location: 'Eastwood Mall',
+        title: 'Initial Assembly',
+        location: 'Cyberzone Tech Lounge (The Annex)',
         timeLabel: '3:00 PM',
-        description: 'Converge at atrium.',
+        description:
+            'Designated lounge meetup spot for everyone while checking out tech setups.',
         status: ActivityStatus.upcoming,
         canRate: true),
     TimelineActivity(
         id: 'a2',
-        title: 'Timezone Gaming',
-        location: '3F Eastwood',
-        timeLabel: '3:30 PM',
-        description: 'Arcade session.',
+        title: 'Escape Room Challenge',
+        location: 'Left Behind Escape Rooms (4F)',
+        timeLabel: '4:00 PM',
+        description:
+            'Cooperative puzzle solving! Group slot booked to test the crew\'s logic synergy.',
         status: ActivityStatus.upcoming,
         canRate: true),
     TimelineActivity(
         id: 'a3',
-        title: 'Dinner Together',
-        location: 'Kettle by Todd',
-        timeLabel: '7:00 PM',
-        description: 'Reserved table.',
+        title: 'Heavy Dinner Drop',
+        location: 'Ramen Nagi (The Block)',
+        timeLabel: '6:30 PM',
+        description:
+            'Filling premium ramen bowls to celebrate or wind down after the activities.',
         status: ActivityStatus.upcoming,
         canRate: true),
   ];

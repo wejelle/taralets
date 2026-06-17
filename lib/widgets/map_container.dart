@@ -105,19 +105,16 @@ class _MapContainerState extends State<MapContainer>
         height: widget.height,
         child: Stack(
           children: [
-            // ── 1. GOOGLE MAPS PLACEHOLDER ──
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFE5E9EA),
-              ),
-              child: const Center(
-                child: Text(
-                    'Google Maps Image Placeholder\n(Uncomment image code here)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.black26,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12)),
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE5E9EA),
+                ),
+                child: Image.asset(
+                  'assets/images/map.png',
+                  fit: BoxFit
+                      .cover, // Pipilitin nitong punuin ang buong widget.height
+                ),
               ),
             ),
 
