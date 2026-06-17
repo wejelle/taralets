@@ -380,7 +380,7 @@ class _MemberMarker extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.transparent,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(

@@ -48,7 +48,7 @@ class _MemberCardState extends State<MemberCard> {
       case MemberStatus.pending:
         return 'Should leave at ${widget.member.targetLeaveTime}';
       case MemberStatus.ready:
-        return 'Ready to leave';
+        return 'Is on their way!';
       case MemberStatus.inTransit:
         return 'Left at ${widget.member.actualLeaveTime ?? "..."}';
       case MemberStatus.arrived:

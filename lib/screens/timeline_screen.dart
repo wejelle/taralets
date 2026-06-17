@@ -44,18 +44,13 @@ class _TimelineScreenState extends State<TimelineScreen> {
     super.dispose();
   }
 
-  // BAGO: Logic para ma-calculate ang dynamic ETA ng timeline elements (Image 5 logic)
   String _calculateDynamicTime(int index) {
     final now = TimeOfDay.now();
-    // Default start time natin is Target Time or current time + 1 hour
     int baseMinutes = widget.targetTime != null
         ? (widget.targetTime!.hour * 60) + widget.targetTime!.minute
         : (now.hour * 60) + now.minute + 60;
 
-    // Ina-apply natin ang reported delays para mag-adjust buong timeline
     baseMinutes += widget.reportedDelayMinutes;
-
-    // Bawat sunod na activity ay ina-assume nating +75 mins away for demo
     int accumulatedMinutes = baseMinutes + (index * 75);
 
     final h = (accumulatedMinutes ~/ 60) % 24;
@@ -101,17 +96,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
     });
   }
 
-  // BAGO: Interactive Check for the "Play/Active" button to move downward
   void _markCurrentAsDone(int index) {
     setState(() {
       if (_activities[index].status == ActivityStatus.upcoming) {
-        _activities[index].status = ActivityStatus.inProgress; // Simulan muna
+        _activities[index].status = ActivityStatus.inProgress; 
       } else {
-        _activities[index].status =
-            ActivityStatus.completed; // Pag ni-click ulit, Done na
+        _activities[index].status = ActivityStatus.completed; 
         if (index + 1 < _activities.length) {
-          _activities[index + 1].status =
-              ActivityStatus.inProgress; // Move sa next
+          _activities[index + 1].status = ActivityStatus.inProgress; 
         }
       }
     });
@@ -120,7 +112,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Sumusunod sa MainShell
+      backgroundColor: Colors.transparent, 
       body: Stack(
         children: [
           SafeArea(
@@ -202,7 +194,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
                     },
                     itemBuilder: (context, index) {
                       final act = _activities[index];
-                      // Kinukuha ang dynamic calculated time natin
                       final assignedTime = _calculateDynamicTime(index);
 
                       return ReorderableDragStartListener(
@@ -214,8 +205,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                           isLast: index == _activities.length - 1,
                           onRate: (rating) =>
                               setState(() => act.userRating = rating),
-                          onComplete: () => _markCurrentAsDone(
-                              index), // Pinapasa yung action function
+                          onComplete: () => _markCurrentAsDone(index), 
                         ),
                       );
                     },
@@ -227,9 +217,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeInOut,
-            bottom: _toastVisible
-                ? 100
-                : -80, // Inangat ko pataas nang kaunti para di matakpan ng nav
+            bottom: _toastVisible ? 100 : -80, 
             left: 20,
             right: 20,
             child: _StatusToast(
@@ -241,7 +229,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 }
 
-// ── Timeline Node Structural Element ──────────────────────────────────────────
+// ── Timeline Node Structural Element (INAYOS ANG BUG DITO) ──
 
 class _TimelineNode extends StatefulWidget {
   final TimelineActivity activity;
@@ -292,228 +280,229 @@ class _TimelineNodeState extends State<_TimelineNode> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Column(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                      color: nodeBg,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: nodeColor, width: 2)),
-                  child: Icon(nodeIcon, color: nodeColor, size: 15),
-                ),
-                if (!widget.isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      color: widget.activity.status == ActivityStatus.completed
-                          ? AppColors.teal
-                          : Colors.white.withOpacity(0.5),
-                    ),
-                  ),
-              ],
+      child: Stack(
+        children: [
+          // Timeline Line Fix (Pinalitan ang IntrinsicHeight ng Stack)
+          if (!widget.isLast)
+            Positioned(
+              left: 15, 
+              top: 32, 
+              bottom: 0, 
+              child: Container(
+                width: 2,
+                color: widget.activity.status == ActivityStatus.completed
+                    ? AppColors.teal
+                    : Colors.white.withOpacity(0.5),
+              ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          widget.displayTime,
-                          style: const TextStyle(
-                              color: AppColors.charcoal,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900),
-                        ),
-                        if (widget.activity.status ==
-                            ActivityStatus.inProgress) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 3),
-                            decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(6)),
-                            child: const Text('ACTIVE NOW',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.5)),
+          
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                    color: nodeBg,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: nodeColor, width: 2)),
+                child: Icon(nodeIcon, color: nodeColor, size: 15),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            widget.displayTime,
+                            style: const TextStyle(
+                                color: AppColors.charcoal,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900),
                           ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    AnimatedScale(
-                      scale: _isHovered ? 1.02 : 1.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white
-                                  .withOpacity(_isHovered ? 0.7 : 0.4),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: widget.activity.status ==
-                                        ActivityStatus.inProgress
-                                    ? AppColors.primary.withOpacity(0.5)
-                                    : Colors.white.withOpacity(0.6),
-                                width: 1.5,
-                              ),
+                          if (widget.activity.status ==
+                              ActivityStatus.inProgress) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(6)),
+                              child: const Text('ACTIVE NOW',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5)),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      AnimatedScale(
+                        scale: _isHovered ? 1.02 : 1.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.white
+                                    .withOpacity(_isHovered ? 0.7 : 0.4),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: widget.activity.status ==
+                                          ActivityStatus.inProgress
+                                      ? AppColors.primary.withOpacity(0.5)
+                                      : Colors.white.withOpacity(0.6),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(widget.activity.title,
+                                                style: const TextStyle(
+                                                    color: AppColors.charcoal,
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w900)),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                    Icons.location_on_outlined,
+                                                    size: 13,
+                                                    color: AppColors.captionText),
+                                                const SizedBox(width: 3),
+                                                Expanded(
+                                                    child: Text(
+                                                        widget.activity.location,
+                                                        style: const TextStyle(
+                                                            color: AppColors
+                                                                .bodyText,
+                                                            fontSize: 11,
+                                                            fontWeight:
+                                                                FontWeight.w600),
+                                                        overflow: TextOverflow
+                                                            .ellipsis)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding:
+                                            EdgeInsets.only(left: 6.0, top: 2.0),
+                                        child: Icon(Icons.drag_indicator_rounded,
+                                            color: Colors.black26, size: 20),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(widget.activity.description,
+                                      style: TextStyle(
+                                          color:
+                                              AppColors.charcoal.withOpacity(0.8),
+                                          fontSize: 12,
+                                          height: 1.45)),
+
+                                  if (widget.activity.status ==
+                                      ActivityStatus.inProgress) ...[
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        onPressed: widget.onComplete,
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.teal,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10))),
+                                        icon: const Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 16),
+                                        label: const Text("Mark as Completed",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 12)),
+                                      ),
+                                    )
+                                  ],
+
+                                  if (widget.activity.status ==
+                                          ActivityStatus.completed &&
+                                      widget.activity.canRate) ...[
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.6),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.white),
+                                      ),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(widget.activity.title,
-                                              style: const TextStyle(
+                                          const Text('Rate Your Experience',
+                                              style: TextStyle(
                                                   color: AppColors.charcoal,
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w900)),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                  Icons.location_on_outlined,
-                                                  size: 13,
-                                                  color: AppColors.captionText),
-                                              const SizedBox(width: 3),
-                                              Expanded(
-                                                  child: Text(
-                                                      widget.activity.location,
-                                                      style: const TextStyle(
-                                                          color: AppColors
-                                                              .bodyText,
-                                                          fontSize: 11,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                      overflow: TextOverflow
-                                                          .ellipsis)),
-                                            ],
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w800)),
+                                          const SizedBox(height: 8),
+                                          StarRating(
+                                            rating: widget.activity.userRating,
+                                            interactive: true,
+                                            size: 24,
+                                            onChanged: widget.onRate,
                                           ),
+                                          if (widget.activity.userRating > 0) ...[
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              _ratingLabel(
+                                                  widget.activity.userRating),
+                                              style: const TextStyle(
+                                                  color: AppColors.teal,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w900),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
-                                    const Padding(
-                                      padding:
-                                          EdgeInsets.only(left: 6.0, top: 2.0),
-                                      child: Icon(Icons.drag_indicator_rounded,
-                                          color: Colors.black26, size: 20),
-                                    )
                                   ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(widget.activity.description,
-                                    style: TextStyle(
-                                        color:
-                                            AppColors.charcoal.withOpacity(0.8),
-                                        fontSize: 12,
-                                        height: 1.45)),
-
-                                // BAGO: Interactive Checkbox for "In Progress" activities
-                                if (widget.activity.status ==
-                                    ActivityStatus.inProgress) ...[
-                                  const SizedBox(height: 12),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton.icon(
-                                      onPressed: widget.onComplete,
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.teal,
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10))),
-                                      icon: const Icon(
-                                          Icons.check_circle_rounded,
-                                          size: 16),
-                                      label: const Text("Mark as Completed",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 12)),
-                                    ),
-                                  )
                                 ],
-
-                                if (widget.activity.status ==
-                                        ActivityStatus.completed &&
-                                    widget.activity.canRate) ...[
-                                  const SizedBox(height: 12),
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.white),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('Rate Your Experience',
-                                            style: TextStyle(
-                                                color: AppColors.charcoal,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w800)),
-                                        const SizedBox(height: 8),
-                                        StarRating(
-                                          rating: widget.activity.userRating,
-                                          interactive: true,
-                                          size: 24,
-                                          onChanged: widget.onRate,
-                                        ),
-                                        if (widget.activity.userRating > 0) ...[
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            _ratingLabel(
-                                                widget.activity.userRating),
-                                            style: const TextStyle(
-                                                color: AppColors.teal,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w900),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
