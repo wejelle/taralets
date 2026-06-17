@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../widgets/map_container.dart';
 import '../widgets/alert_modal.dart';
 import '../screens/dashboard_screen.dart';
+import '../main.dart';
 
 class InitializationScreen extends StatefulWidget {
   const InitializationScreen({super.key});
@@ -22,6 +23,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
 
   // Controller para sa Group Name
   final TextEditingController _groupNameController = TextEditingController();
+  TimeOfDay? _targetArrivalTime; // BAGONG VARIABLE PARA SA MODULE 3.0
 
   @override
   void dispose() {
@@ -29,25 +31,35 @@ class _InitializationScreenState extends State<InitializationScreen> {
     super.dispose();
   }
 
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(primary: AppColors.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _targetArrivalTime) {
+      setState(() => _targetArrivalTime = picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.charcoal,
-      // FIX 1: Pinipigilan ang map na ma-squish kapag nag-open ang keyboard
       resizeToAvoidBottomInset: false,
-
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Stack(
           children: [
-            // ── 1. Full screen map ──
             Positioned.fill(
-              child: MapContainer(
-                height: double.infinity,
-                showPin: _pinSet,
-                showCrosshairs: !_pinSet,
-                pinLabel: _pinnedLabel,
-              ),
+              child: MapContainer(height: double.infinity, showPin: _pinSet, showCrosshairs: !_pinSet, pinLabel: _pinnedLabel),
             ),
 
             // ── 2. Top bar ──
@@ -125,76 +137,75 @@ class _InitializationScreenState extends State<InitializationScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                // FIX 3: Kusang iaangat ang panel kapag naglabas ng keyboard
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: SafeArea(
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      mainAxisSize: MainAxisSize
-                          .min, // FIX 4: Kusang yayakapin ang sukat ng children, walang overflow
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Group Name Input
+                        // MODULE 3.0: Trip Name Input
                         GlassContainer(
                           borderRadius: 14,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                           child: TextField(
                             controller: _groupNameController,
-                            style: const TextStyle(
-                                color: Colors.black87,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700),
+                            style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w700),
                             decoration: const InputDecoration(
-                              hintText: 'Enter Group Name (e.g. Project Team)',
-                              hintStyle: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600),
+                              hintText: 'Enter Trip Name',
+                              hintStyle: TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w600),
                               border: InputBorder.none,
-                              icon: Icon(Icons.group_add_rounded,
-                                  color: Colors.black54, size: 20),
+                              icon: Icon(Icons.flight_takeoff_rounded, color: Colors.black54, size: 20),
                             ),
                           ),
                         ),
                         const SizedBox(height: 10),
 
-                        // Location search field
+                        // MODULE 3.0: Target Arrival Time Picker
+                        GestureDetector(
+                          onTap: () => _selectTime(context),
+                          child: GlassContainer(
+                            borderRadius: 14,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.access_time_rounded, color: Colors.black54, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _targetArrivalTime == null ? 'Set Target Arrival Time' : 'Arrival Time: ${_targetArrivalTime!.format(context)}',
+                                    style: TextStyle(
+                                      color: _targetArrivalTime == null ? Colors.black54 : Colors.black87,
+                                      fontSize: 14,
+                                      fontWeight: _targetArrivalTime == null ? FontWeight.w600 : FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // MODULE 3.0: Destination Pinning (Nandito na 'to dati)
                         GlassContainer(
                           borderRadius: 14,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           child: Row(
                             children: [
-                              const Icon(Icons.search_rounded,
-                                  color: Colors.black54, size: 20),
+                              const Icon(Icons.location_on_rounded, color: Colors.black54, size: 20),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  _pinSet
-                                      ? _pinnedLabel
-                                      : 'Search or tap map to pin…',
-                                  style: TextStyle(
-                                    color: _pinSet
-                                        ? Colors.black87
-                                        : Colors.black54,
-                                    fontSize: 14,
-                                    fontWeight: _pinSet
-                                        ? FontWeight.w700
-                                        : FontWeight.w600,
-                                  ),
+                                  _pinSet ? _pinnedLabel : 'Search or tap map to pin…',
+                                  style: TextStyle(color: _pinSet ? Colors.black87 : Colors.black54, fontSize: 14, fontWeight: _pinSet ? FontWeight.w700 : FontWeight.w600),
                                 ),
                               ),
                               if (_pinSet)
                                 GestureDetector(
-                                  onTap: () => setState(() {
-                                    _pinSet = false;
-                                    _pinnedLabel = 'Custom Pin';
-                                  }),
-                                  child: const Icon(Icons.close_rounded,
-                                      color: Colors.black54, size: 18),
+                                  onTap: () => setState(() { _pinSet = false; _pinnedLabel = 'Custom Pin'; }),
+                                  child: const Icon(Icons.close_rounded, color: Colors.black54, size: 18),
                                 ),
                             ],
                           ),
@@ -206,77 +217,32 @@ class _InitializationScreenState extends State<InitializationScreen> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              _QuickPin(
-                                  label: 'Eastwood Mall',
-                                  onTap: () => setState(() {
-                                        _pinnedLabel = 'Eastwood City Mall';
-                                        _pinSet = true;
-                                      })),
+                              _QuickPin(label: 'Eastwood Mall', onTap: () => setState(() { _pinnedLabel = 'Eastwood City Mall'; _pinSet = true; })),
                               const SizedBox(width: 8),
-                              _QuickPin(
-                                  label: 'SM North EDSA',
-                                  onTap: () => setState(() {
-                                        _pinnedLabel = 'SM North EDSA';
-                                        _pinSet = true;
-                                      })),
-                              const SizedBox(width: 8),
-                              _QuickPin(
-                                  label: 'Trinoma',
-                                  onTap: () => setState(() {
-                                        _pinnedLabel = 'Trinoma Mall';
-                                        _pinSet = true;
-                                      })),
+                              _QuickPin(label: 'SM North EDSA', onTap: () => setState(() { _pinnedLabel = 'SM North EDSA'; _pinSet = true; })),
                             ],
                           ),
                         ),
                         const SizedBox(height: 10),
 
-                        // Confirm button
+                        // Confirm button (Nire-require na ngayon ang Time at Map Pin bago mag-proceed!)
                         SizedBox(
                           width: double.infinity,
                           child: GestureDetector(
-                            onTap: _pinSet
+                            onTap: (_pinSet && _targetArrivalTime != null) 
                                 ? () {
                                     _showConfirmSnack(context);
                                     setState(() => _groupSessionVisible = true);
                                   }
                                 : null,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  if (_pinSet)
-                                    BoxShadow(
-                                        color:
-                                            AppColors.primary.withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4)),
-                                ],
-                              ),
-                              child: GlassContainer(
-                                borderRadius: 14,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                color: _pinSet
-                                    ? AppColors.primary.withOpacity(0.85)
-                                    : Colors.white.withOpacity(0.25),
-                                borderColor: _pinSet
-                                    ? AppColors.primary
-                                    : Colors.white.withOpacity(0.4),
-                                child: Center(
-                                  child: Text(
-                                    _pinSet
-                                        ? 'Confirm Meetup Point'
-                                        : 'Tap map to pin a location',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: _pinSet
-                                          ? Colors.white
-                                          : Colors.black54,
-                                    ),
-                                  ),
+                            child: GlassContainer(
+                              borderRadius: 14,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              color: (_pinSet && _targetArrivalTime != null) ? AppColors.primary.withOpacity(0.85) : Colors.white.withOpacity(0.25),
+                              child: Center(
+                                child: Text(
+                                  (_pinSet && _targetArrivalTime != null) ? 'Confirm Trip Details' : 'Complete Trip Info',
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: (_pinSet && _targetArrivalTime != null) ? Colors.white : Colors.black54),
                                 ),
                               ),
                             ),
@@ -514,8 +480,17 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 width: double.infinity,
                 child: GestureDetector(
                   onTap: () {
-                    // Logic para mag-start ang sync
-                    setState(() => _groupSessionVisible = false);
+                    // DITO NATIN PAGDUDUGTUNGIN! Papasa natin ang data sa Dashboard.
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainShell(
+                          tripName: _groupNameController.text.isNotEmpty ? _groupNameController.text : 'Taralets Trip',
+                          location: _pinnedLabel,
+                          targetTime: _targetArrivalTime,
+                        ),
+                      ),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14),

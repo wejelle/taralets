@@ -54,8 +54,17 @@ class TaraletsApp extends StatelessWidget {
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  // 1. Idagdag ang mga variables na ito para matanggap ang data:
+  final String tripName;
+  final String location;
+  final TimeOfDay? targetTime;
 
+  const MainShell({
+    super.key,
+    this.tripName = 'Taralets! 🎉',
+    this.location = 'Eastwood City Mall',
+    this.targetTime,
+  });
   @override
   State<MainShell> createState() => _MainShellState();
 }
@@ -63,12 +72,16 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    DashboardScreen(),
-    InviteScreen(),
-    DiscoverScreen(),
-    TimelineScreen(),
-    InitializationScreen(),
+  List<Widget> get _screens => [
+    DashboardScreen(
+      tripName: widget.tripName,
+      location: widget.location,
+      targetTime: widget.targetTime,
+    ),
+    const InviteScreen(),
+    const DiscoverScreen(),
+    const TimelineScreen(),
+    const InitializationScreen(),
   ];
 
   @override

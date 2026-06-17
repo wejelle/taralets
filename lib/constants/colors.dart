@@ -6,6 +6,7 @@ class AppColors {
   static const Color secondary = Color(0xFFF89B29);     // Orange (Para sa kabilang dulo ng gradient)
   static const Color primaryLight = Color(0xFFFFE5EE);  // Lighter shade ng primary para sa highlights
   static const Color background = Color(0xFFFAFAFA);    // Clean off-white background
+  static const Color surface = Color(0xFFF8FAFC);       // Light gray para sa cards/fields
   
   // ── Text & UI Elements ─────────────────────────────────────────
   static const Color charcoal = Color(0xFF1E293B);      // Dark blue-gray para sa readable text
