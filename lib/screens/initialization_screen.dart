@@ -1,3 +1,4 @@
+import 'dart:ui'; // 1. Kailangan para sa ImageFilter.blur
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/map_container.dart';
@@ -21,7 +22,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
       backgroundColor: AppColors.charcoal,
       body: Stack(
         children: [
-          // Full screen map
+          // Full screen map (Ito mismo ang magiging background na mabu-blur sa ilalim ng glass)
           Positioned.fill(
             child: MapContainer(
               height: double.infinity,
@@ -31,48 +32,60 @@ class _InitializationScreenState extends State<InitializationScreen> {
             ),
           ),
 
-          // Top bar
+          // ── Top bar ────────────────────────────────────────────────────────
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                    ),
+                  // Glassy Set Meetup Point
+                  GlassContainer(
+                    borderRadius: 14,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_location_alt_rounded, color: AppColors.primary, size: 18),
+                        Icon(Icons.add_location_alt_rounded,
+                            color: AppColors.primary, size: 18),
                         SizedBox(width: 8),
-                        Text('Set Meetup Point', style: TextStyle(color: AppColors.charcoal, fontSize: 14, fontWeight: FontWeight.w700)),
+                        Text('Set Meetup Point',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700)),
                       ],
                     ),
                   ),
                   const Spacer(),
+                  // Glassy Alert Button
                   GestureDetector(
                     onTap: () => setState(() => _alertVisible = !_alertVisible),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: _alertVisible ? AppColors.urgent : AppColors.urgentLight,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                      ),
+                    child: GlassContainer(
+                      borderRadius: 14,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      color: _alertVisible
+                          ? AppColors.urgent.withOpacity(0.75)
+                          : AppColors.urgent.withOpacity(0.15),
+                      borderColor: _alertVisible
+                          ? AppColors.urgent
+                          : AppColors.urgent.withOpacity(0.4),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.warning_rounded, color: _alertVisible ? Colors.white : AppColors.urgent, size: 18),
+                          Icon(Icons.warning_rounded,
+                              color: _alertVisible
+                                  ? Colors.white
+                                  : AppColors.urgent,
+                              size: 18),
                           const SizedBox(width: 6),
                           Text(
                             'Alerts',
                             style: TextStyle(
-                              color: _alertVisible ? Colors.white : AppColors.urgent,
+                              color: _alertVisible
+                                  ? Colors.white
+                                  : AppColors.urgent,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                             ),
@@ -86,7 +99,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
             ),
           ),
 
-          // Bottom panel
+          // ── Bottom panel ───────────────────────────────────────────────────
           Positioned(
             left: 0,
             right: 0,
@@ -98,32 +111,38 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Location search field
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12)],
-                      ),
+                    // Location search field (Glassified)
+                    GlassContainer(
+                      borderRadius: 14,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       child: Row(
                         children: [
-                          const Icon(Icons.search_rounded, color: AppColors.captionText, size: 20),
+                          const Icon(Icons.search_rounded,
+                              color: Colors.black54, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              _pinSet ? _pinnedLabel : 'Search or tap map to pin…',
+                              _pinSet
+                                  ? _pinnedLabel
+                                  : 'Search or tap map to pin…',
                               style: TextStyle(
-                                color: _pinSet ? AppColors.charcoal : AppColors.captionText,
+                                color:
+                                    _pinSet ? Colors.black87 : Colors.black54,
                                 fontSize: 14,
-                                fontWeight: _pinSet ? FontWeight.w600 : FontWeight.w400,
+                                fontWeight:
+                                    _pinSet ? FontWeight.w700 : FontWeight.w600,
                               ),
                             ),
                           ),
                           if (_pinSet)
                             GestureDetector(
-                              onTap: () => setState(() { _pinSet = false; _pinnedLabel = 'Custom Pin'; }),
-                              child: const Icon(Icons.close_rounded, color: AppColors.captionText, size: 18),
+                              onTap: () => setState(() {
+                                _pinSet = false;
+                                _pinnedLabel = 'Custom Pin';
+                              }),
+                              child: const Icon(Icons.close_rounded,
+                                  color: Colors.black54, size: 18),
                             ),
                         ],
                       ),
@@ -131,33 +150,76 @@ class _InitializationScreenState extends State<InitializationScreen> {
                     const SizedBox(height: 10),
 
                     // Quick-pin suggestions
-                    Row(
-                      children: [
-                        _QuickPin(label: 'Eastwood Mall', onTap: () => setState(() { _pinnedLabel = 'Eastwood City Mall'; _pinSet = true; })),
-                        const SizedBox(width: 8),
-                        _QuickPin(label: 'SM North EDSA', onTap: () => setState(() { _pinnedLabel = 'SM North EDSA'; _pinSet = true; })),
-                        const SizedBox(width: 8),
-                        _QuickPin(label: 'Trinoma', onTap: () => setState(() { _pinnedLabel = 'Trinoma Mall'; _pinSet = true; })),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _QuickPin(
+                              label: 'Eastwood Mall',
+                              onTap: () => setState(() {
+                                    _pinnedLabel = 'Eastwood City Mall';
+                                    _pinSet = true;
+                                  })),
+                          const SizedBox(width: 8),
+                          _QuickPin(
+                              label: 'SM North EDSA',
+                              onTap: () => setState(() {
+                                    _pinnedLabel = 'SM North EDSA';
+                                    _pinSet = true;
+                                  })),
+                          const SizedBox(width: 8),
+                          _QuickPin(
+                              label: 'Trinoma',
+                              onTap: () => setState(() {
+                                    _pinnedLabel = 'Trinoma Mall';
+                                    _pinSet = true;
+                                  })),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 10),
 
-                    // Confirm button
+                    // Confirm button (Glassified Animated Button)
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _pinSet ? () => _showConfirmSnack(context) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          disabledBackgroundColor: AppColors.divider,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          _pinSet ? 'Confirm Meetup Point' : 'Tap map to pin a location',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      child: GestureDetector(
+                        onTap:
+                            _pinSet ? () => _showConfirmSnack(context) : null,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              if (_pinSet)
+                                BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4)),
+                            ],
+                          ),
+                          child: GlassContainer(
+                            borderRadius: 14,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            color: _pinSet
+                                ? AppColors.primary.withOpacity(0.85)
+                                : Colors.white.withOpacity(0.25),
+                            borderColor: _pinSet
+                                ? AppColors.primary
+                                : Colors.white.withOpacity(0.4),
+                            child: Center(
+                              child: Text(
+                                _pinSet
+                                    ? 'Confirm Meetup Point'
+                                    : 'Tap map to pin a location',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      _pinSet ? Colors.white : Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -167,12 +229,17 @@ class _InitializationScreenState extends State<InitializationScreen> {
             ),
           ),
 
-          // Alert modal overlay
+          // ── Alert modal overlay (With Dark Glass Backdrop) ─────────────────
           if (_alertVisible)
             Positioned.fill(
               child: GestureDetector(
                 onTap: () => setState(() => _alertVisible = false),
-                child: Container(color: Colors.black.withOpacity(0.4)),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                      sigmaX: 5.0,
+                      sigmaY: 5.0), // Blurred out background kapag may modal
+                  child: Container(color: Colors.black.withOpacity(0.4)),
+                ),
               ),
             ),
           if (_alertVisible)
@@ -182,7 +249,8 @@ class _InitializationScreenState extends State<InitializationScreen> {
               bottom: 0,
               child: SafeArea(
                 top: false,
-                child: UrgentDepartureModal(onDismiss: () => setState(() => _alertVisible = false)),
+                child: UrgentDepartureModal(
+                    onDismiss: () => setState(() => _alertVisible = false)),
               ),
             ),
         ],
@@ -212,14 +280,57 @@ class _QuickPin extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: GlassContainer(
+        borderRadius: 10,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 6)],
+        color: Colors.white.withOpacity(
+            0.35), // Mas mataas nang unti opacity para madaling basahin
+        child: Text(label,
+            style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 12,
+                fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+}
+
+// ── Reusable Glass Container ─────────────────────────────────────────────────
+class GlassContainer extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final EdgeInsetsGeometry? padding;
+  final Color? color;
+  final Color? borderColor;
+
+  const GlassContainer({
+    super.key,
+    required this.child,
+    this.borderRadius = 14.0,
+    this.padding,
+    this.color,
+    this.borderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: color ??
+                Colors.white.withOpacity(0.25), // Map-friendly default opacity
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: borderColor ?? Colors.white.withOpacity(0.4),
+              width: 1.5,
+            ),
+          ),
+          child: child,
         ),
-        child: Text(label, style: const TextStyle(color: AppColors.charcoal, fontSize: 12, fontWeight: FontWeight.w600)),
       ),
     );
   }

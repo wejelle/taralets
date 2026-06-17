@@ -91,11 +91,36 @@ class _MainShellState extends State<MainShell> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _NavItem(icon: Icons.map_outlined, label: 'Map', index: 0, current: _currentIndex, onTap: _onTap),
-                _NavItem(icon: Icons.group_add_outlined, label: 'Invite', index: 1, current: _currentIndex, onTap: _onTap),
-                _NavItem(icon: Icons.explore_outlined, label: 'Discover', index: 2, current: _currentIndex, onTap: _onTap),
-                _NavItem(icon: Icons.timeline_outlined, label: 'Timeline', index: 3, current: _currentIndex, onTap: _onTap),
-                _NavItem(icon: Icons.add_location_alt_outlined, label: 'Pin', index: 4, current: _currentIndex, onTap: _onTap),
+                _NavItem(
+                    icon: Icons.map_outlined,
+                    label: 'Map',
+                    index: 0,
+                    current: _currentIndex,
+                    onTap: _onTap),
+                _NavItem(
+                    icon: Icons.group_add_outlined,
+                    label: 'Invite',
+                    index: 1,
+                    current: _currentIndex,
+                    onTap: _onTap),
+                _NavItem(
+                    icon: Icons.explore_outlined,
+                    label: 'Discover',
+                    index: 2,
+                    current: _currentIndex,
+                    onTap: _onTap),
+                _NavItem(
+                    icon: Icons.timeline_outlined,
+                    label: 'Timeline',
+                    index: 3,
+                    current: _currentIndex,
+                    onTap: _onTap),
+                _NavItem(
+                    icon: Icons.add_location_alt_outlined,
+                    label: 'Pin',
+                    index: 4,
+                    current: _currentIndex,
+                    onTap: _onTap),
               ],
             ),
           ),
@@ -137,13 +162,17 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: active ? AppColors.primary.withOpacity(0.12) : Colors.transparent,
+                color: active
+                    ? AppColors.primary.withOpacity(0.12)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 22,
-                color: active ? AppColors.primary : AppColors.charcoal.withOpacity(0.4),
+                color: active
+                    ? AppColors.primary
+                    : AppColors.charcoal.withOpacity(0.4),
               ),
             ),
             const SizedBox(height: 2),
@@ -152,7 +181,9 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                color: active ? AppColors.primary : AppColors.charcoal.withOpacity(0.4),
+                color: active
+                    ? AppColors.primary
+                    : AppColors.charcoal.withOpacity(0.4),
               ),
             ),
           ],
