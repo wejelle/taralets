@@ -17,13 +17,11 @@ class _InitializationScreenState extends State<InitializationScreen> {
   bool _alertVisible = false;
   String _pinnedLabel = 'Custom Pin';
   bool _pinSet = false;
-  
-  // State para sa Group Coordination Prototype
+
   bool _groupSessionVisible = false;
 
-  // Controller para sa Group Name
   final TextEditingController _groupNameController = TextEditingController();
-  TimeOfDay? _targetArrivalTime; // BAGONG VARIABLE PARA SA MODULE 3.0
+  TimeOfDay? _targetArrivalTime;
 
   @override
   void dispose() {
@@ -59,7 +57,11 @@ class _InitializationScreenState extends State<InitializationScreen> {
         child: Stack(
           children: [
             Positioned.fill(
-              child: MapContainer(height: double.infinity, showPin: _pinSet, showCrosshairs: !_pinSet, pinLabel: _pinnedLabel),
+              child: MapContainer(
+                  height: double.infinity,
+                  showPin: _pinSet,
+                  showCrosshairs: !_pinSet,
+                  pinLabel: _pinnedLabel),
             ),
 
             // ── 2. Top bar ──
@@ -133,11 +135,11 @@ class _InitializationScreenState extends State<InitializationScreen> {
             ),
 
             // ── 3. Bottom panel ──
-            // FIX 2: Pinalitan ang Positioned ng Align para natural na umangkla sa baba
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: SafeArea(
                   top: false,
                   child: Padding(
@@ -148,15 +150,23 @@ class _InitializationScreenState extends State<InitializationScreen> {
                         // MODULE 3.0: Trip Name Input
                         GlassContainer(
                           borderRadius: 14,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 2),
                           child: TextField(
                             controller: _groupNameController,
-                            style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w700),
+                            style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700),
                             decoration: const InputDecoration(
                               hintText: 'Enter Trip Name',
-                              hintStyle: TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w600),
+                              hintStyle: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600),
                               border: InputBorder.none,
-                              icon: Icon(Icons.flight_takeoff_rounded, color: Colors.black54, size: 20),
+                              icon: Icon(Icons.flight_takeoff_rounded,
+                                  color: Colors.black54, size: 20),
                             ),
                           ),
                         ),
@@ -167,18 +177,26 @@ class _InitializationScreenState extends State<InitializationScreen> {
                           onTap: () => _selectTime(context),
                           child: GlassContainer(
                             borderRadius: 14,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
                             child: Row(
                               children: [
-                                const Icon(Icons.access_time_rounded, color: Colors.black54, size: 20),
+                                const Icon(Icons.access_time_rounded,
+                                    color: Colors.black54, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    _targetArrivalTime == null ? 'Set Target Arrival Time' : 'Arrival Time: ${_targetArrivalTime!.format(context)}',
+                                    _targetArrivalTime == null
+                                        ? 'Set Target Arrival Time'
+                                        : 'Arrival Time: ${_targetArrivalTime!.format(context)}',
                                     style: TextStyle(
-                                      color: _targetArrivalTime == null ? Colors.black54 : Colors.black87,
+                                      color: _targetArrivalTime == null
+                                          ? Colors.black54
+                                          : Colors.black87,
                                       fontSize: 14,
-                                      fontWeight: _targetArrivalTime == null ? FontWeight.w600 : FontWeight.w700,
+                                      fontWeight: _targetArrivalTime == null
+                                          ? FontWeight.w600
+                                          : FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -188,24 +206,39 @@ class _InitializationScreenState extends State<InitializationScreen> {
                         ),
                         const SizedBox(height: 10),
 
-                        // MODULE 3.0: Destination Pinning (Nandito na 'to dati)
+                        // MODULE 3.0: Destination Pinning
                         GlassContainer(
                           borderRadius: 14,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           child: Row(
                             children: [
-                              const Icon(Icons.location_on_rounded, color: Colors.black54, size: 20),
+                              const Icon(Icons.location_on_rounded,
+                                  color: Colors.black54, size: 20),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  _pinSet ? _pinnedLabel : 'Search or tap map to pin…',
-                                  style: TextStyle(color: _pinSet ? Colors.black87 : Colors.black54, fontSize: 14, fontWeight: _pinSet ? FontWeight.w700 : FontWeight.w600),
+                                  _pinSet
+                                      ? _pinnedLabel
+                                      : 'Search or tap map to pin…',
+                                  style: TextStyle(
+                                      color: _pinSet
+                                          ? Colors.black87
+                                          : Colors.black54,
+                                      fontSize: 14,
+                                      fontWeight: _pinSet
+                                          ? FontWeight.w700
+                                          : FontWeight.w600),
                                 ),
                               ),
                               if (_pinSet)
                                 GestureDetector(
-                                  onTap: () => setState(() { _pinSet = false; _pinnedLabel = 'Custom Pin'; }),
-                                  child: const Icon(Icons.close_rounded, color: Colors.black54, size: 18),
+                                  onTap: () => setState(() {
+                                    _pinSet = false;
+                                    _pinnedLabel = 'Custom Pin';
+                                  }),
+                                  child: const Icon(Icons.close_rounded,
+                                      color: Colors.black54, size: 18),
                                 ),
                             ],
                           ),
@@ -217,19 +250,29 @@ class _InitializationScreenState extends State<InitializationScreen> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              _QuickPin(label: 'Eastwood Mall', onTap: () => setState(() { _pinnedLabel = 'Eastwood City Mall'; _pinSet = true; })),
+                              _QuickPin(
+                                  label: 'Eastwood Mall',
+                                  onTap: () => setState(() {
+                                        _pinnedLabel = 'Eastwood City Mall';
+                                        _pinSet = true;
+                                      })),
                               const SizedBox(width: 8),
-                              _QuickPin(label: 'SM North EDSA', onTap: () => setState(() { _pinnedLabel = 'SM North EDSA'; _pinSet = true; })),
+                              _QuickPin(
+                                  label: 'SM North EDSA',
+                                  onTap: () => setState(() {
+                                        _pinnedLabel = 'SM North EDSA';
+                                        _pinSet = true;
+                                      })),
                             ],
                           ),
                         ),
                         const SizedBox(height: 10),
 
-                        // Confirm button (Nire-require na ngayon ang Time at Map Pin bago mag-proceed!)
+                        // Confirm button
                         SizedBox(
                           width: double.infinity,
                           child: GestureDetector(
-                            onTap: (_pinSet && _targetArrivalTime != null) 
+                            onTap: (_pinSet && _targetArrivalTime != null)
                                 ? () {
                                     _showConfirmSnack(context);
                                     setState(() => _groupSessionVisible = true);
@@ -238,11 +281,21 @@ class _InitializationScreenState extends State<InitializationScreen> {
                             child: GlassContainer(
                               borderRadius: 14,
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              color: (_pinSet && _targetArrivalTime != null) ? AppColors.primary.withOpacity(0.85) : Colors.white.withOpacity(0.25),
+                              color: (_pinSet && _targetArrivalTime != null)
+                                  ? AppColors.primary.withOpacity(0.85)
+                                  : Colors.white.withOpacity(0.25),
                               child: Center(
                                 child: Text(
-                                  (_pinSet && _targetArrivalTime != null) ? 'Confirm Trip Details' : 'Complete Trip Info',
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: (_pinSet && _targetArrivalTime != null) ? Colors.white : Colors.black54),
+                                  (_pinSet && _targetArrivalTime != null)
+                                      ? 'Confirm Trip Details'
+                                      : 'Complete Trip Info',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: (_pinSet &&
+                                              _targetArrivalTime != null)
+                                          ? Colors.white
+                                          : Colors.black54),
                                 ),
                               ),
                             ),
@@ -278,7 +331,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 ),
               ),
 
-            // ── 5. GROUP COORDINATION (MODULE 2.0) OVERLAY ──
+            // ── 5. GROUP COORDINATION OVERLAY ──
             if (_groupSessionVisible)
               Positioned.fill(
                 child: GestureDetector(
@@ -317,7 +370,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
     );
   }
 
-  // ── GROUP COORDINATION PROTOTYPE WIDGETS (UPDATED) ──
   Widget _buildGroupCoordinationPrototype() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -347,8 +399,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // 1. Group Creation Output
               Text(
                 'Group Name: ${_groupNameController.text.isNotEmpty ? _groupNameController.text : 'Your Group'}',
                 style: const TextStyle(
@@ -359,7 +409,8 @@ class _InitializationScreenState extends State<InitializationScreen> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 14),
+                  const Icon(Icons.location_on_rounded,
+                      color: AppColors.primary, size: 14),
                   const SizedBox(width: 4),
                   Text(
                     _pinnedLabel,
@@ -371,8 +422,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 ],
               ),
               const Divider(height: 24, color: AppColors.divider),
-
-              // 2. Interactive Room Code Generation
               const Text(
                 'Share Room Code',
                 style: TextStyle(
@@ -388,24 +437,26 @@ class _InitializationScreenState extends State<InitializationScreen> {
                       content: const Text('Room code copied to clipboard! 📋'),
                       backgroundColor: AppColors.teal,
                       behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight, // Highlight color
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      )
-                    ]
-                  ),
+                      color: AppColors.primaryLight, // Highlight color
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: AppColors.primary.withOpacity(0.2), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ]),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -418,14 +469,13 @@ class _InitializationScreenState extends State<InitializationScreen> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Icon(Icons.copy_rounded, color: AppColors.primary, size: 20),
+                      Icon(Icons.copy_rounded,
+                          color: AppColors.primary, size: 20),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // 3. Live Member List with Statuses
               const Text(
                 'Live Member List',
                 style: TextStyle(
@@ -434,58 +484,47 @@ class _InitializationScreenState extends State<InitializationScreen> {
                     fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              
-              // Host (You)
               _buildMemberRow(
-                name: 'You (Host)', 
-                status: 'Ready', 
-                icon: Icons.star_rounded, 
-                iconColor: AppColors.starGold,
-                statusColor: AppColors.teal,
-                eta: 'ETA: 15 mins'
-              ),
+                  name: 'You (Host)',
+                  status: 'Ready',
+                  icon: Icons.star_rounded,
+                  iconColor: AppColors.starGold,
+                  statusColor: AppColors.teal,
+                  eta: 'ETA: 15 mins'),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Divider(height: 1, color: AppColors.divider),
               ),
-              
-              // Member 1 (On the way)
               _buildMemberRow(
-                name: 'Denanajewaig', 
-                status: 'On the way', 
-                icon: Icons.directions_car_rounded, 
-                iconColor: AppColors.bodyText,
-                statusColor: AppColors.urgent,
-                eta: 'ETA: 22 mins'
-              ),
+                  name: 'Denanajewaig',
+                  status: 'On the way',
+                  icon: Icons.directions_car_rounded,
+                  iconColor: AppColors.bodyText,
+                  statusColor: AppColors.urgent,
+                  eta: 'ETA: 22 mins'),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Divider(height: 1, color: AppColors.divider),
               ),
-              
-              // Member 2 (Waiting)
               _buildMemberRow(
-                name: 'Waiting for others...', 
-                status: 'Pending', 
-                icon: Icons.more_horiz_rounded, 
-                iconColor: AppColors.captionText,
-                statusColor: AppColors.captionText,
-                eta: '--'
-              ),
-
+                  name: 'Waiting for others...',
+                  status: 'Pending',
+                  icon: Icons.more_horiz_rounded,
+                  iconColor: AppColors.captionText,
+                  statusColor: AppColors.captionText,
+                  eta: '--'),
               const SizedBox(height: 24),
-
-              // Main CTA: Gradient Button
               SizedBox(
                 width: double.infinity,
                 child: GestureDetector(
                   onTap: () {
-                    // DITO NATIN PAGDUDUGTUNGIN! Papasa natin ang data sa Dashboard.
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => MainShell(
-                          tripName: _groupNameController.text.isNotEmpty ? _groupNameController.text : 'Taralets Trip',
+                          tripName: _groupNameController.text.isNotEmpty
+                              ? _groupNameController.text
+                              : 'Taralets Trip',
                           location: _pinnedLabel,
                           targetTime: _targetArrivalTime,
                         ),
@@ -522,8 +561,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              
-              // Cancel / Close
               Center(
                 child: GestureDetector(
                   onTap: () => setState(() => _groupSessionVisible = false),
@@ -548,9 +585,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
   }
 
   Widget _buildMemberRow({
-    required String name, 
-    required String status, 
-    required IconData icon, 
+    required String name,
+    required String status,
+    required IconData icon,
     required Color iconColor,
     required Color statusColor,
     required String eta,
@@ -597,7 +634,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
           child: Text(
             status,
             style: TextStyle(
-              color: statusColor == AppColors.captionText ? AppColors.bodyText : statusColor,
+              color: statusColor == AppColors.captionText
+                  ? AppColors.bodyText
+                  : statusColor,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),

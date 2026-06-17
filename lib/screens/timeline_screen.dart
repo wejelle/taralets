@@ -1,12 +1,23 @@
 import 'dart:async';
-import 'dart:ui'; // 1. Import para sa blur effect
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../models/timeline_activity.dart';
 import '../widgets/star_rating.dart';
 
 class TimelineScreen extends StatefulWidget {
-  const TimelineScreen({super.key});
+  final String tripName;
+  final String location;
+  final TimeOfDay? targetTime;
+  final int reportedDelayMinutes;
+
+  const TimelineScreen({
+    super.key,
+    this.tripName = 'Trip Timeline',
+    this.location = 'Target Destination',
+    this.targetTime,
+    this.reportedDelayMinutes = 0,
+  });
 
   @override
   State<TimelineScreen> createState() => _TimelineScreenState();
@@ -21,9 +32,33 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void initState() {
     super.initState();
     _activities = TimelineActivity.mockActivities();
+
     _toastTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) setState(() => _toastVisible = false);
     });
+  }
+
+  String _calculateDepartureTime() {
+    if (widget.targetTime == null) return "Not set";
+
+    int travelTime = 30;
+    int totalMinutes = widget.targetTime!.hour * 60 + widget.targetTime!.minute;
+    int currentDelay = widget.reportedDelayMinutes;
+    int departureMinutes = totalMinutes - travelTime + currentDelay;
+
+    while (departureMinutes < 0) {
+      departureMinutes += 24 * 60;
+    }
+    departureMinutes = departureMinutes % (24 * 60);
+
+    int hour = (departureMinutes / 60).floor();
+    int minute = (departureMinutes % 60).toInt();
+
+    final period = hour >= 12 ? "PM" : "AM";
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final displayMinute = minute.toString().padLeft(2, '0');
+
+    return "$displayHour:$displayMinute $period";
   }
 
   @override
@@ -34,8 +69,22 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // FIX: Nilagyan ng explicitly 'userRating: 0' at 'canRate: false' para
+    // maiwasan ang "type 'Null' is not a subtype of type 'int'" crash!
+    if (widget.targetTime != null && _activities.isNotEmpty) {
+      _activities[0] = TimelineActivity(
+        id: 'a1',
+        title: 'Meet-up at ${widget.location}',
+        location: widget.location,
+        timeLabel: widget.targetTime!.format(context),
+        description: 'Everyone converges here at the target arrival time.',
+        status: ActivityStatus.inProgress,
+        userRating: 0,
+        canRate: false,
+      );
+    }
+
     return Scaffold(
-      // 2. Gradient Background gamit ang Stack
       body: Stack(
         children: [
           Container(
@@ -43,10 +92,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE0C3FC),
-                  Color(0xFF8EC5FC),
-                ],
+                colors: [Color(0xFFE0C3FC), Color(0xFF8EC5FC)],
               ),
             ),
           ),
@@ -55,22 +101,34 @@ class _TimelineScreenState extends State<TimelineScreen> {
               children: [
                 CustomScrollView(
                   slivers: [
-                    const SliverToBoxAdapter(
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Trip Timeline',
-                                style: TextStyle(
+                            Text(widget.tripName,
+                                style: const TextStyle(
                                     color: Colors.black87,
                                     fontSize: 26,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w900,
                                     letterSpacing: -0.5)),
-                            SizedBox(height: 2),
-                            Text('Saturday, Jun 21 · Eastwood City',
-                                style: TextStyle(
-                                    color: Colors.black54, fontSize: 13)),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Leave by: ${_calculateDepartureTime()} 🚗',
+                                style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -92,7 +150,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                   ],
                 ),
 
-                // Floating toast (Glassified)
+                // Floating toast
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOut,
@@ -111,8 +169,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 }
 
-// ── Timeline node ──────────────────────────────────────────────────────────────
-
 class _TimelineNode extends StatelessWidget {
   final TimelineActivity activity;
   final bool isLast;
@@ -130,18 +186,17 @@ class _TimelineNode extends StatelessWidget {
     switch (activity.status) {
       case ActivityStatus.completed:
         nodeColor = AppColors.teal;
-        nodeBg = AppColors.teal.withOpacity(0.2); // Ginawang semi-transparent
+        nodeBg = AppColors.teal.withOpacity(0.2);
         nodeIcon = Icons.check_rounded;
         break;
       case ActivityStatus.inProgress:
         nodeColor = AppColors.primary;
-        nodeBg =
-            AppColors.primary.withOpacity(0.2); // Ginawang semi-transparent
+        nodeBg = AppColors.primary.withOpacity(0.2);
         nodeIcon = Icons.play_arrow_rounded;
         break;
       case ActivityStatus.upcoming:
         nodeColor = Colors.black38;
-        nodeBg = Colors.white.withOpacity(0.2); // Glassy placeholder
+        nodeBg = Colors.white.withOpacity(0.2);
         nodeIcon = Icons.circle_outlined;
         break;
     }
@@ -150,7 +205,6 @@ class _TimelineNode extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Timeline spine
           Column(
             children: [
               Container(
@@ -164,16 +218,13 @@ class _TimelineNode extends StatelessWidget {
               ),
               if (!isLast)
                 Expanded(
-                  child: Container(
-                    width: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: Colors.black12, // Inadjust for gradient bg
-                  ),
-                ),
+                    child: Container(
+                        width: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        color: Colors.black12)),
             ],
           ),
           const SizedBox(width: 14),
-          // Content
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 18),
@@ -183,13 +234,11 @@ class _TimelineNode extends StatelessWidget {
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      Text(
-                        activity.timeLabel,
-                        style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700),
-                      ),
+                      Text(activity.timeLabel,
+                          style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
                       if (activity.status == ActivityStatus.inProgress) ...[
                         const SizedBox(width: 8),
                         Container(
@@ -208,8 +257,6 @@ class _TimelineNode extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-
-                  // 3. Mismong Activity Card (Glassmorphism applied)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14),
                     child: BackdropFilter(
@@ -218,17 +265,15 @@ class _TimelineNode extends StatelessWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: activity.status == ActivityStatus.inProgress
-                              ? Colors.white.withOpacity(
-                                  0.45) // Medyo mas opaque kung active
-                              : Colors.white.withOpacity(
-                                  0.25), // Mas transparent kung hindi
+                              ? Colors.white.withOpacity(0.45)
+                              : Colors.white.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: activity.status == ActivityStatus.inProgress
-                                ? AppColors.primary.withOpacity(0.5)
-                                : Colors.white.withOpacity(0.4),
-                            width: 1.5,
-                          ),
+                              color:
+                                  activity.status == ActivityStatus.inProgress
+                                      ? AppColors.primary.withOpacity(0.5)
+                                      : Colors.white.withOpacity(0.4),
+                              width: 1.5),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,20 +303,16 @@ class _TimelineNode extends StatelessWidget {
                                     color: Colors.black87,
                                     fontSize: 12,
                                     height: 1.5)),
-
-                            // Rating widget for completed rateable activities
                             if (activity.status == ActivityStatus.completed &&
                                 activity.canRate) ...[
                               const SizedBox(height: 12),
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.white
-                                      .withOpacity(0.3), // Glassy inner box
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color: Colors.white.withOpacity(0.2)),
-                                ),
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Colors.white.withOpacity(0.2))),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -282,21 +323,17 @@ class _TimelineNode extends StatelessWidget {
                                             fontWeight: FontWeight.w700)),
                                     const SizedBox(height: 8),
                                     StarRating(
-                                      rating: activity.userRating,
-                                      interactive: true,
-                                      size: 26,
-                                      onChanged: onRate,
-                                    ),
+                                        rating: activity.userRating,
+                                        interactive: true,
+                                        size: 26,
+                                        onChanged: onRate),
                                     if (activity.userRating > 0) ...[
                                       const SizedBox(height: 6),
-                                      Text(
-                                        _ratingLabel(activity.userRating),
-                                        style: const TextStyle(
-                                            color: AppColors.teal,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight
-                                                .w800), // Inadjust ang weight para mas kita
-                                      ),
+                                      Text(_ratingLabel(activity.userRating),
+                                          style: const TextStyle(
+                                              color: AppColors.teal,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800)),
                                     ],
                                   ],
                                 ),
@@ -334,15 +371,12 @@ class _TimelineNode extends StatelessWidget {
   }
 }
 
-// ── Status toast ───────────────────────────────────────────────────────────────
-
 class _StatusToast extends StatelessWidget {
   final VoidCallback onDismiss;
   const _StatusToast({required this.onDismiss});
 
   @override
   Widget build(BuildContext context) {
-    // 4. Dark Glass Effect para sa floating toast
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
@@ -350,12 +384,9 @@ class _StatusToast extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.black
-                .withOpacity(0.55), // Semi-transparent dark background
+            color: Colors.black.withOpacity(0.55),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-                color: Colors.white.withOpacity(0.15),
-                width: 1), // Subtle shine edge
+            border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
             boxShadow: [
               BoxShadow(
                   color: Colors.black.withOpacity(0.15),
@@ -366,25 +397,23 @@ class _StatusToast extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                    color: AppColors.teal, shape: BoxShape.circle),
-              ),
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                      color: AppColors.teal, shape: BoxShape.circle)),
               const SizedBox(width: 10),
               Expanded(
                 child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 13, height: 1.4),
+                  text: const TextSpan(
+                    style: TextStyle(fontSize: 13, height: 1.4),
                     children: [
-                      const TextSpan(
-                          text: 'Dinner Together',
+                      TextSpan(
+                          text: 'Travel Monitoring',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700)),
                       TextSpan(
-                          text:
-                              ' is in progress. All 5 members have checked in. 🎉',
+                          text: ' is active. Real-time updates enabled. 📡',
                           style: TextStyle(color: Colors.white70)),
                     ],
                   ),
@@ -392,10 +421,9 @@ class _StatusToast extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: onDismiss,
-                child: Icon(Icons.close_rounded,
-                    color: Colors.white.withOpacity(0.6), size: 18),
-              ),
+                  onTap: onDismiss,
+                  child: Icon(Icons.close_rounded,
+                      color: Colors.white.withOpacity(0.6), size: 18)),
             ],
           ),
         ),

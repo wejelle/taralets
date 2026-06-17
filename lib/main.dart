@@ -54,7 +54,6 @@ class TaraletsApp extends StatelessWidget {
 }
 
 class MainShell extends StatefulWidget {
-  // 1. Idagdag ang mga variables na ito para matanggap ang data:
   final String tripName;
   final String location;
   final TimeOfDay? targetTime;
@@ -72,17 +71,61 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
+  int _reportedDelayMinutes = 0;
+  bool _isReady = false;
+
+  void _addDelay(int minutes) {
+    setState(() {
+      _reportedDelayMinutes += minutes;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Schedule Adjusted! Added $minutes mins. 🚦'),
+        backgroundColor: AppColors.urgent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  void _toggleReady() {
+    setState(() {
+      _isReady = !_isReady;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_isReady
+            ? 'You are marked as Ready! 🎉'
+            : 'Status set to Pending.'),
+        backgroundColor: AppColors.teal,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   List<Widget> get _screens => [
-    DashboardScreen(
-      tripName: widget.tripName,
-      location: widget.location,
-      targetTime: widget.targetTime,
-    ),
-    const InviteScreen(),
-    const DiscoverScreen(),
-    const TimelineScreen(),
-    const InitializationScreen(),
-  ];
+        DashboardScreen(
+          tripName: widget.tripName,
+          location: widget.location,
+          targetTime: widget.targetTime,
+          reportedDelayMinutes: _reportedDelayMinutes,
+          isReady: _isReady,
+          onAddDelay: _addDelay,
+          onToggleReady: _toggleReady,
+        ),
+        const InviteScreen(),
+        const DiscoverScreen(),
+        TimelineScreen(
+          tripName: widget.tripName,
+          location: widget.location,
+          targetTime: widget.targetTime,
+          reportedDelayMinutes: _reportedDelayMinutes,
+        ),
+        const InitializationScreen(),
+      ];
 
   @override
   Widget build(BuildContext context) {

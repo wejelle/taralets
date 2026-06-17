@@ -17,9 +17,15 @@ class HomeScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               // Greeting
-              const Text('Hello, Traveler! 👋', style: TextStyle(color: AppColors.charcoal, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+              const Text('Hello, Traveler!',
+                  style: TextStyle(
+                      color: AppColors.charcoal,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5)),
               const SizedBox(height: 8),
-              const Text('Ready for your next group travel?', style: TextStyle(color: AppColors.bodyText, fontSize: 14)),
+              const Text('Ready for your next group travel?',
+                  style: TextStyle(color: AppColors.bodyText, fontSize: 14)),
               const SizedBox(height: 40),
 
               // Empty State (Wala pang trip)
@@ -33,11 +39,19 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: const Column(
                   children: [
-                    Icon(Icons.flight_takeoff_rounded, color: AppColors.captionText, size: 48),
+                    Icon(Icons.flight_takeoff_rounded,
+                        color: AppColors.captionText, size: 48),
                     SizedBox(height: 16),
-                    Text('No Active Trips', style: TextStyle(color: AppColors.charcoal, fontSize: 16, fontWeight: FontWeight.w800)),
+                    Text('No Active Trips',
+                        style: TextStyle(
+                            color: AppColors.charcoal,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800)),
                     SizedBox(height: 4),
-                    Text("You don't have any ongoing meetups right now.", textAlign: TextAlign.center, style: TextStyle(color: AppColors.bodyText, fontSize: 13)),
+                    Text("You don't have any ongoing meetups right now.",
+                        textAlign: TextAlign.center,
+                        style:
+                            TextStyle(color: AppColors.bodyText, fontSize: 13)),
                   ],
                 ),
               ),
@@ -52,9 +66,9 @@ class HomeScreen extends StatelessWidget {
                 color: AppColors.primary,
                 onTap: () {
                   Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const InitializationScreen())
-                  );
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const InitializationScreen()));
                 },
               ),
               const SizedBox(height: 16),
@@ -75,7 +89,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard({required BuildContext context, required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildActionCard(
+      {required BuildContext context,
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -84,13 +104,20 @@ class HomeScreen extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.divider),
-          boxShadow: [BoxShadow(color: color.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+                color: color.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4))
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: color, size: 28),
             ),
             const SizedBox(width: 16),
@@ -98,13 +125,20 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: AppColors.charcoal, fontSize: 16, fontWeight: FontWeight.w800)),
+                  Text(title,
+                      style: const TextStyle(
+                          color: AppColors.charcoal,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: AppColors.bodyText, fontSize: 12)),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          color: AppColors.bodyText, fontSize: 12)),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.captionText, size: 16),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                color: AppColors.captionText, size: 16),
           ],
         ),
       ),
@@ -116,23 +150,30 @@ class HomeScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.background,
-        title: const Text('Join Group', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text('Join Group',
+            style: TextStyle(fontWeight: FontWeight.w800)),
         content: TextField(
           decoration: InputDecoration(
             hintText: 'Enter 6-digit Room Code',
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.divider)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.divider)),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Joined group successfully!')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Joined group successfully!')));
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white),
             child: const Text('Join'),
           ),
         ],

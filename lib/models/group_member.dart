@@ -28,7 +28,8 @@ class GroupMember {
 
   String get departureBadgeLabel {
     if (departureMinutesFromNow <= 0) return 'Depart now!';
-    if (departureMinutesFromNow < 60) return 'Leave in ${departureMinutesFromNow}m';
+    if (departureMinutesFromNow < 60)
+      return 'Leave in ${departureMinutesFromNow}m';
     final h = departureMinutesFromNow ~/ 60;
     final m = departureMinutesFromNow % 60;
     return m == 0 ? 'Leave in ${h}h' : 'Leave in ${h}h ${m}m';
@@ -60,8 +61,8 @@ class GroupMember {
   static const List<GroupMember> mockMembers = [
     GroupMember(
       id: 'u1',
-      name: 'Mikee Santos',
-      avatarInitials: 'MS',
+      name: 'Jewelle Lucero',
+      avatarInitials: 'JL',
       avatarColor: Color(0xFF8B5CF6),
       mockLocation: 'Katipunan Ave, QC',
       distanceKm: 1.2,
@@ -71,8 +72,8 @@ class GroupMember {
     ),
     GroupMember(
       id: 'u2',
-      name: 'Carlo Reyes',
-      avatarInitials: 'CR',
+      name: 'Ana Cruz',
+      avatarInitials: 'AC',
       avatarColor: Color(0xFF0D9488),
       mockLocation: 'Timog Ave, QC',
       distanceKm: 3.4,
@@ -81,8 +82,8 @@ class GroupMember {
     ),
     GroupMember(
       id: 'u3',
-      name: 'Anika Flores',
-      avatarInitials: 'AF',
+      name: 'Gia Lopez',
+      avatarInitials: 'GL',
       avatarColor: Color(0xFF0066FF),
       mockLocation: 'Ortigas Center, Pasig',
       distanceKm: 7.8,
@@ -91,23 +92,13 @@ class GroupMember {
     ),
     GroupMember(
       id: 'u4',
-      name: 'Jett Villanueva',
-      avatarInitials: 'JV',
+      name: 'Dennise Sinday',
+      avatarInitials: 'DS',
       avatarColor: Color(0xFFEC4899),
       mockLocation: 'Ayala, Makati',
       distanceKm: 12.1,
       departureMinutesFromNow: 0,
       status: MemberStatus.urgent,
-    ),
-    GroupMember(
-      id: 'u5',
-      name: 'Bea Cruz',
-      avatarInitials: 'BC',
-      avatarColor: Color(0xFFF59E0B),
-      mockLocation: 'Libis, QC',
-      distanceKm: 2.9,
-      departureMinutesFromNow: 18,
-      status: MemberStatus.onTheWay,
     ),
   ];
 }

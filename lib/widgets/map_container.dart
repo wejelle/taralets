@@ -1,11 +1,15 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../models/group_member.dart';
 
-class MapContainer extends StatelessWidget {
+class MapContainer extends StatefulWidget {
   final double height;
   final bool showPin;
   final bool showCrosshairs;
   final String? pinLabel;
+  final List<GroupMember> members;
+  final bool isReady;
 
   const MapContainer({
     super.key,
@@ -13,53 +17,228 @@ class MapContainer extends StatelessWidget {
     this.showPin = true,
     this.showCrosshairs = false,
     this.pinLabel,
+    this.members = const [],
+    this.isReady = false,
   });
+
+  @override
+  State<MapContainer> createState() => _MapContainerState();
+}
+
+class _MapContainerState extends State<MapContainer>
+    with TickerProviderStateMixin {
+  AnimationController? _lineController;
+  AnimationController? _othersController;
+  AnimationController? _userController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Makina para sa dashed lines (umaandar palagi)
+    _lineController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+    // Makina para sa ibang members (tuloy-tuloy na umaandar patungo sa dest)
+    _othersController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 45));
+
+    // Makina para lang sayo ("You")
+    _userController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 45));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _lineController?.repeat();
+        _othersController?.forward(); // Yung iba umaandar na
+        if (widget.isReady)
+          _userController?.forward(); // Ikaw aandar lang pag Ready
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(MapContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isReady != oldWidget.isReady) {
+      if (widget.isReady) {
+        _userController?.forward(); // Tuloy ang andar mo
+      } else {
+        _userController?.stop(); // HIHINTO lang kung nasaan ka (hindi babalik)
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _lineController?.dispose();
+    _othersController?.dispose();
+    _userController?.dispose();
+    super.dispose();
+  }
+
+  Alignment _getOrthogonalAlignment(
+      Alignment start, Alignment end, double progress, bool horizontalFirst) {
+    Alignment corner =
+        horizontalFirst ? Alignment(end.x, start.y) : Alignment(start.x, end.y);
+
+    double dx1 = corner.x - start.x;
+    double dy1 = corner.y - start.y;
+    double dist1 = sqrt(dx1 * dx1 + dy1 * dy1);
+
+    double dx2 = end.x - corner.x;
+    double dy2 = end.y - corner.y;
+    double dist2 = sqrt(dx2 * dx2 + dy2 * dy2);
+
+    double totalDist = dist1 + dist2;
+    if (totalDist == 0) return start;
+
+    double currentDist = progress * totalDist;
+
+    if (currentDist <= dist1) {
+      double t = dist1 == 0 ? 0 : currentDist / dist1;
+      return Alignment(start.x + dx1 * t, start.y + dy1 * t);
+    } else {
+      double t = dist2 == 0 ? 0 : (currentDist - dist1) / dist2;
+      return Alignment(corner.x + dx2 * t, corner.y + dy2 * t);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(
-        height: height,
+        height: widget.height,
         child: Stack(
           children: [
-            // Stylized map background
-            _MockMapBackground(),
-            // Grid lines overlay
-            CustomPaint(
-              size: Size(double.infinity, height),
-              painter: _GridPainter(),
+            // ── 1. GOOGLE MAPS PLACEHOLDER ──
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFE5E9EA),
+              ),
+              child: const Center(
+                child: Text(
+                    'Google Maps Image Placeholder\n(Uncomment image code here)',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black26,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12)),
+              ),
             ),
-            // Roads overlay
-            CustomPaint(
-              size: Size(double.infinity, height),
-              painter: _RoadsPainter(),
-            ),
-            if (showCrosshairs) _Crosshairs(),
-            if (showPin) _MeetupPin(label: pinLabel ?? 'Eastwood City Mall'),
-            // Branding overlay
+
+            // ── 2. ANIMATED ORTHOGONAL ROUTE LINES ──
+            if (_lineController != null)
+              AnimatedBuilder(
+                  animation: _lineController!,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      size: Size(double.infinity, widget.height),
+                      painter: _RoutePainter(
+                        members: widget.members,
+                        isReady: widget.isReady,
+                        animationValue: _lineController!.value,
+                      ),
+                    );
+                  }),
+
+            if (widget.showCrosshairs) _Crosshairs(),
+
+            // ── 3. GUMAGALAW NA MEMBERS (Avatars) ──
+            if (_othersController != null && _userController != null)
+              // FIX: Ginawang Positioned.fill para hindi mag-collapse at lumitaw ang ulo nila
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation:
+                      Listenable.merge([_othersController!, _userController!]),
+                  builder: (context, child) {
+                    List<Widget> markers = [];
+
+                    // A. Ibang Members (Umaandar palagi)
+                    widget.members.asMap().forEach((idx, member) {
+                      double xOffset =
+                          (idx % 2 == 0 ? 0.8 : -0.8) * (1 + (idx / 2) * 0.15);
+                      double yOffset = (idx % 3 == 0 ? 0.75 : -0.75) *
+                          (1 + (idx / 3) * 0.15);
+                      Alignment startAlign = Alignment(
+                          xOffset.clamp(-0.9, 0.9), yOffset.clamp(-0.9, 0.9));
+                      bool horizontalFirst = idx % 2 == 0;
+
+                      double progress = _othersController!.value * 0.85;
+                      Alignment currentAlign = _getOrthogonalAlignment(
+                          startAlign,
+                          Alignment.center,
+                          progress,
+                          horizontalFirst);
+
+                      markers.add(Align(
+                        alignment: currentAlign,
+                        child: _MemberMarker(
+                            name: member.name.split(' ')[0],
+                            isMoving: true,
+                            color: AppColors.primary),
+                      ));
+                    });
+
+                    // B. Ikaw / "You" (Hihinto kapag hindi ready)
+                    Alignment startAlignYou = const Alignment(
+                        0.0, 0.85); // Nasa bandang gitna-ibaba ka magsisimula
+                    double progressYou = _userController!.value * 0.85;
+                    Alignment currentAlignYou = _getOrthogonalAlignment(
+                        startAlignYou, Alignment.center, progressYou, true);
+
+                    markers.add(Align(
+                      alignment: currentAlignYou,
+                      child: _MemberMarker(
+                          name: 'You',
+                          isMoving: widget.isReady,
+                          color: widget.isReady
+                              ? AppColors.teal
+                              : AppColors
+                                  .urgent // Teal pag ready, Red pag nakahinto
+                          ),
+                    ));
+
+                    return Stack(children: markers);
+                  },
+                ),
+              ),
+
+            // Destination Pin
+            if (widget.showPin)
+              _MeetupPin(label: widget.pinLabel ?? 'Eastwood City Mall'),
+
+            // UI Overlay Text
             Positioned(
               top: 12,
               left: 14,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.92),
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 6)
+                  ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.location_on, color: AppColors.primary, size: 14),
-                    SizedBox(width: 4),
+                    Icon(
+                        widget.isReady
+                            ? Icons.radar_rounded
+                            : Icons.location_on,
+                        color:
+                            widget.isReady ? AppColors.teal : AppColors.primary,
+                        size: 14),
+                    const SizedBox(width: 4),
                     Text(
-                      'Meetup Map',
-                      style: TextStyle(
-                        color: AppColors.charcoal,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      widget.isReady ? 'Live Routing Active' : 'Meetup Map',
+                      style: const TextStyle(
+                          color: AppColors.charcoal,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
@@ -72,78 +251,172 @@ class MapContainer extends StatelessWidget {
   }
 }
 
-// ── Internals ──────────────────────────────────────────────────────────────────
+class _RoutePainter extends CustomPainter {
+  final List<GroupMember> members;
+  final bool isReady;
+  final double animationValue;
 
-class _MockMapBackground extends StatelessWidget {
+  _RoutePainter(
+      {required this.members,
+      required this.isReady,
+      required this.animationValue});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    // Linya para sa ibang members
+    for (int idx = 0; idx < members.length; idx++) {
+      double xOffset = (idx % 2 == 0 ? 0.8 : -0.8) * (1 + (idx / 2) * 0.15);
+      double yOffset = (idx % 3 == 0 ? 0.75 : -0.75) * (1 + (idx / 3) * 0.15);
+      Alignment startAlign =
+          Alignment(xOffset.clamp(-0.9, 0.9), yOffset.clamp(-0.9, 0.9));
+
+      final memberPos = Offset(
+        (startAlign.x + 1) * size.width / 2,
+        (startAlign.y + 1) * size.height / 2,
+      );
+
+      final paint = Paint()
+        ..color = AppColors.primary.withOpacity(0.4)
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+
+      bool horizontalFirst = idx % 2 == 0;
+      Offset corner = horizontalFirst
+          ? Offset(center.dx, memberPos.dy)
+          : Offset(memberPos.dx, center.dy);
+
+      _drawOrthogonalDashedLine(
+          canvas, memberPos, corner, center, paint, animationValue);
+    }
+
+    // Linya para sayo ("You")
+    Alignment startAlignYou = const Alignment(0.0, 0.85);
+    final youPos = Offset(
+      (startAlignYou.x + 1) * size.width / 2,
+      (startAlignYou.y + 1) * size.height / 2,
+    );
+
+    final paintYou = Paint()
+      ..color = isReady
+          ? AppColors.teal.withOpacity(0.8)
+          : AppColors.urgent.withOpacity(0.5)
+      ..strokeWidth = isReady ? 3.0 : 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    Offset cornerYou = Offset(center.dx, youPos.dy);
+    _drawOrthogonalDashedLine(
+        canvas,
+        youPos,
+        cornerYou,
+        center,
+        paintYou,
+        isReady
+            ? animationValue
+            : 0); // Titigil ang animation ng dash mo pag di ready
+  }
+
+  void _drawOrthogonalDashedLine(Canvas canvas, Offset p1, Offset corner,
+      Offset p2, Paint paint, double phase) {
+    const double dashWidth = 6;
+    const double dashSpace = 4;
+    const double totalLength = dashWidth + dashSpace;
+
+    double dist1 = (corner - p1).distance;
+    double dist2 = (p2 - corner).distance;
+    double totalDist = dist1 + dist2;
+
+    double startOffset = -phase * totalLength;
+    double currentDist = startOffset;
+
+    while (currentDist < totalDist) {
+      double drawStart = currentDist;
+      double drawEnd = currentDist + dashWidth;
+
+      if (drawStart < 0) drawStart = 0;
+      if (drawEnd > totalDist) drawEnd = totalDist;
+
+      if (drawStart < drawEnd) {
+        canvas.drawLine(
+            _getPointAlongPath(p1, corner, p2, dist1, dist2, drawStart),
+            _getPointAlongPath(p1, corner, p2, dist1, dist2, drawEnd),
+            paint);
+      }
+      currentDist += totalLength;
+    }
+  }
+
+  Offset _getPointAlongPath(Offset p1, Offset corner, Offset p2, double dist1,
+      double dist2, double d) {
+    if (d <= dist1) {
+      double t = dist1 == 0 ? 0 : d / dist1;
+      return Offset.lerp(p1, corner, t)!;
+    } else {
+      double t = dist2 == 0 ? 0 : (d - dist1) / dist2;
+      return Offset.lerp(corner, p2, t)!;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RoutePainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.isReady != isReady;
+  }
+}
+
+// FIX: Ginawang mas flexible ang Marker para ma-customize ang kulay ng "You" at ng "Others"
+class _MemberMarker extends StatelessWidget {
+  final String name;
+  final bool isMoving;
+  final Color color;
+
+  const _MemberMarker(
+      {required this.name, required this.isMoving, required this.color});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFE8F4FD), Color(0xFFD6EAF8), Color(0xFFBFD7ED)],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                  color: isMoving ? color.withOpacity(0.5) : Colors.black26,
+                  blurRadius: isMoving ? 10 : 4,
+                  offset: const Offset(0, 2))
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 12,
+            backgroundColor: isMoving ? color : AppColors.secondary,
+            child: Icon(isMoving ? Icons.directions_car_rounded : Icons.person,
+                size: 14, color: Colors.white),
+          ),
         ),
-      ),
+        const SizedBox(height: 2),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(4)),
+          child: Text(
+            name,
+            style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: AppColors.charcoal),
+          ),
+        ),
+      ],
     );
   }
-}
-
-class _GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFB0C8DA).withOpacity(0.5)
-      ..strokeWidth = 0.6;
-    const spacing = 28.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _RoadsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = Colors.white.withOpacity(0.85)
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
-    final minorPaint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-
-    final w = size.width;
-    final h = size.height;
-
-    // Major horizontal road
-    canvas.drawLine(Offset(0, h * 0.42), Offset(w, h * 0.38), roadPaint);
-    // Major vertical road
-    canvas.drawLine(Offset(w * 0.38, 0), Offset(w * 0.42, h), roadPaint);
-    // Diagonal road
-    canvas.drawLine(Offset(0, h * 0.7), Offset(w * 0.6, h * 0.3), minorPaint);
-    // Minor horizontal
-    canvas.drawLine(Offset(0, h * 0.65), Offset(w, h * 0.68), minorPaint);
-    // Minor vertical
-    canvas.drawLine(Offset(w * 0.7, 0), Offset(w * 0.72, h), minorPaint);
-
-    // Blocks (filled rects to simulate city blocks)
-    final blockPaint = Paint()..color = const Color(0xFFCADFEE).withOpacity(0.6);
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.44, h * 0.04, w * 0.24, h * 0.32), const Radius.circular(4)), blockPaint);
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.06, h * 0.44, w * 0.3, h * 0.18), const Radius.circular(4)), blockPaint);
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.44, h * 0.44, w * 0.2, h * 0.5), const Radius.circular(4)), blockPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _MeetupPin extends StatelessWidget {
@@ -161,23 +434,27 @@ class _MeetupPin extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                    color: AppColors.primary.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4))
+              ],
             ),
-            child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+            child: Text(label,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
           ),
-          Container(
-            width: 2,
-            height: 12,
-            color: AppColors.primary,
-          ),
+          Container(width: 2, height: 12, color: AppColors.primary),
           Container(
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-            ),
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2)),
           ),
         ],
       ),
@@ -192,17 +469,20 @@ class _Crosshairs extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(width: 40, height: 1.5, color: AppColors.charcoal.withOpacity(0.5)),
-          Container(width: 1.5, height: 40, color: AppColors.charcoal.withOpacity(0.5)),
           Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.urgent, width: 2),
-              shape: BoxShape.circle,
-              color: Colors.transparent,
-            ),
-          ),
+              width: 40,
+              height: 1.5,
+              color: AppColors.charcoal.withOpacity(0.5)),
+          Container(
+              width: 1.5,
+              height: 40,
+              color: AppColors.charcoal.withOpacity(0.5)),
+          Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.urgent, width: 2),
+                  shape: BoxShape.circle)),
         ],
       ),
     );
