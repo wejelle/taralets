@@ -13,6 +13,7 @@ class DashboardScreen extends StatefulWidget {
 
   final int reportedDelayMinutes;
   final bool isReady;
+  final bool hasActiveTrip; // BAGO: Tumatanggap ng status galing sa main shell
   final void Function(int)? onAddDelay;
   final VoidCallback? onToggleReady;
 
@@ -23,6 +24,7 @@ class DashboardScreen extends StatefulWidget {
     this.targetTime,
     this.reportedDelayMinutes = 0,
     this.isReady = false,
+    this.hasActiveTrip = true,
     this.onAddDelay,
     this.onToggleReady,
   });
@@ -100,13 +102,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const members = GroupMember.mockMembers;
+    // DYNAMIC COUNTING KASAMA INVITES:
+    final members = GroupMember.mockMembers;
+
+    // 👈 BAGO: Idagdag itong line na ito DITO para makita ng buong build method
+    final otherMembers = members.where((m) => !m.isCurrentUser).toList();
+
+    final int totalMembers = members.length + 1; // +1 kasi kasama ka (You)
+
+    // Bibilangin lahat ng ready. Ang isReady sa widget ay para sayo.
     final sabayCount =
-        members.where((m) => m.status == MemberStatus.nearBy).length +
+        members.where((m) => m.status == MemberStatus.ready).length +
             (widget.isReady ? 1 : 0);
+    final bool isAllReady = sabayCount == totalMembers;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent, // Mag-aadapt sa global background
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -153,19 +164,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     showPin: true,
                     pinLabel: widget.location,
                     members: members,
-                    isReady: widget.isReady),
+                    // Di na gagalaw hangga't di 4/4 ready
+                    isReady: isAllReady),
               ),
             ),
 
-            // ── PILLS ROW ──
+            // ── PILLS ROW (Dynamic Countdown/Invite Code) ──
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
-                    _CountdownPill(remaining: _remaining, twoDigit: _twoDigit),
+                    // BAGO: Lalabas lang ang countdown pag ready na lahat!
+                    isAllReady
+                        ? _CountdownPill(
+                            remaining: _remaining, twoDigit: _twoDigit)
+                        : const Expanded(
+                            child: Center(
+                                child: Text(
+                                    'Waiting for everyone to be ready...',
+                                    style: TextStyle(
+                                        color: Colors.black54, fontSize: 12)))),
                     const SizedBox(width: 10),
-                    _SabayPill(count: sabayCount, total: members.length + 1),
+                    _SabayPill(
+                        count: sabayCount,
+                        total: totalMembers), // DYNAMIC TOTAL TO!
                   ],
                 ),
               ),
@@ -180,7 +203,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       child: GestureDetector(
                         onTap: widget.onToggleReady,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color:
@@ -216,21 +240,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-
                     Expanded(
                       child: GestureDetector(
                         onTap: _showDelayModal,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: widget.reportedDelayMinutes > 0
                                 ? AppColors.urgent
-                                : AppColors.urgent.withOpacity(0.1),
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                                 color: widget.reportedDelayMinutes > 0
                                     ? AppColors.urgent
-                                    : AppColors.urgent.withOpacity(0.3)),
+                                    : AppColors.divider),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -273,7 +297,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             color: AppColors.charcoal,
                             fontSize: 16,
                             fontWeight: FontWeight.w800)),
-                    Text('${members.length} people',
+                    Text('${members.length + 1} people',
                         style: const TextStyle(
                             color: AppColors.captionText, fontSize: 13)),
                   ],
@@ -283,11 +307,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             // ── LIST: GROUP MEMBERS ──
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              padding: const EdgeInsets.fromLTRB(
+                  20, 0, 20, 100), // Extra padding sa baba para sa floating nav
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => MemberCard(member: members[i]),
-                  childCount: members.length,
+                  (ctx, i) => MemberCard(
+                      member: otherMembers[
+                          i]), // Ginamit ang otherMembers imbes na members
+                  childCount:
+                      otherMembers.length, // Ginamit ang length ng otherMembers
                 ),
               ),
             ),
@@ -345,8 +373,6 @@ class _DelaySelectorModalState extends State<_DelaySelectorModal> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Warning Box
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -354,13 +380,13 @@ class _DelaySelectorModalState extends State<_DelaySelectorModal> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.urgent.withOpacity(0.4)),
               ),
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
+                  Icon(Icons.warning_amber_rounded,
                       color: AppColors.urgent, size: 20),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  SizedBox(width: 12),
+                  Expanded(
                     child: Text(
                       'Warning: Adding a delay will automatically adjust the ETA and departure time for the rest of the group.',
                       style: TextStyle(
@@ -374,15 +400,12 @@ class _DelaySelectorModalState extends State<_DelaySelectorModal> {
               ),
             ),
             const SizedBox(height: 24),
-
             const Text('How long will you be delayed?',
                 style: TextStyle(
                     color: AppColors.charcoal,
                     fontSize: 14,
                     fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
-
-            // Minute Choices
             Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -416,8 +439,6 @@ class _DelaySelectorModalState extends State<_DelaySelectorModal> {
               }).toList(),
             ),
             const SizedBox(height: 32),
-
-            // Confirm Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -476,6 +497,53 @@ class _StatusDot extends StatelessWidget {
   }
 }
 
+// BAGO: Invite Code Banner na pamalit habang naghihintay
+class _InviteCodePill extends StatelessWidget {
+  final String code;
+  const _InviteCodePill({required this.code});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.primaryLight),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Room Invite Code',
+                style: TextStyle(
+                    color: AppColors.captionText,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  code,
+                  style: GoogleFonts.jetBrainsMono(
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const Icon(Icons.copy_rounded,
+                    color: AppColors.primary, size: 18),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CountdownPill extends StatelessWidget {
   final Duration remaining;
   final String Function(int) twoDigit;
@@ -490,7 +558,7 @@ class _CountdownPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.divider),
         ),

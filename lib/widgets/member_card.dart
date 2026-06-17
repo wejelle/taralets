@@ -2,38 +2,102 @@ import 'package:flutter/material.dart';
 import '../models/group_member.dart';
 import '../constants/colors.dart';
 
-class MemberCard extends StatelessWidget {
+class MemberCard extends StatefulWidget {
   final GroupMember member;
-
   const MemberCard({super.key, required this.member});
 
-  // Ligtas na String processing para maiwasan ang enum check errors
-  String _getStatusString() {
-    return member.status.toString().split('.').last.toLowerCase();
+  @override
+  State<MemberCard> createState() => _MemberCardState();
+}
+
+class _MemberCardState extends State<MemberCard> {
+  bool _isNotified = false;
+
+  void _triggerNotify() {
+    setState(() => _isNotified = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Nudge sent to ${widget.member.name.split(' ')[0]}! 🔔'),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+    // Reset notify state for demo purposes
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _isNotified = false);
+    });
   }
 
-  // Nagbibigay ng tamang kulay depende sa text value ng status
-  Color _getBadgeColor(String statusStr) {
-    if (statusStr.contains('near')) {
-      return Colors.green; // Green kung malapit
-    } else if (statusStr.contains('arrive')) {
-      return Colors.amber; // Yellow/Amber kung dumating na
-    } else {
-      return Colors.red;   // Red kung malayo o on the way
+  Color _getBadgeColor() {
+    switch (widget.member.status) {
+      case MemberStatus.pending:
+        return AppColors.urgent;
+      case MemberStatus.ready:
+        return AppColors.teal;
+      case MemberStatus.inTransit:
+        return AppColors.primary;
+      case MemberStatus.arrived:
+        return AppColors.starGold;
     }
   }
 
-  // Nagbibigay ng malinis na text display para sa badge UI
-  String _getBadgeLabel(String statusStr) {
-    if (statusStr.contains('near')) return 'Near';
-    if (statusStr.contains('arrive')) return 'Arrived';
-    return 'Far';
+  String _getBadgeLabel() {
+    switch (widget.member.status) {
+      case MemberStatus.pending:
+        return 'Should leave at ${widget.member.targetLeaveTime}';
+      case MemberStatus.ready:
+        return 'Ready to leave';
+      case MemberStatus.inTransit:
+        return 'Left at ${widget.member.actualLeaveTime ?? "..."}';
+      case MemberStatus.arrived:
+        return 'Arrived at Destination';
+    }
+  }
+
+  Widget _buildTrailingAction() {
+    if (widget.member.status == MemberStatus.pending) {
+      return GestureDetector(
+        onTap: _isNotified ? null : _triggerNotify,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: _isNotified ? AppColors.divider : AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            _isNotified ? 'Notified' : 'Notify',
+            style: TextStyle(
+              color: _isNotified ? AppColors.captionText : AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
+
+    IconData icon;
+    switch (widget.member.status) {
+      case MemberStatus.ready:
+        icon = Icons.check_circle_rounded;
+        break;
+      case MemberStatus.inTransit:
+        icon = Icons.directions_car_rounded;
+        break;
+      case MemberStatus.arrived:
+        icon = Icons.location_on_rounded;
+        break;
+      default:
+        icon = Icons.chevron_right_rounded;
+    }
+    return Icon(icon, color: _getBadgeColor().withOpacity(0.8));
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusStr = _getStatusString();
-
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 0,
@@ -45,62 +109,43 @@ class MemberCard extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: widget.member.avatarColor.withOpacity(0.15),
           child: Text(
-            member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
-            style: const TextStyle(
-              color: AppColors.primary,
+            widget.member.avatarInitials,
+            style: TextStyle(
+              color: widget.member.avatarColor,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              member.name,
-              style: const TextStyle(
-                color: AppColors.charcoal,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 8),
-            
-            // ── COMPILED STATUS BADGE (GREEN / RED / YELLOW) ──
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: _getBadgeColor(statusStr).withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _getBadgeColor(statusStr),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                _getBadgeLabel(statusStr),
-                style: TextStyle(
-                  color: _getBadgeColor(statusStr),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
-        subtitle: Text(
-          // Inalis ang .isReady para mawala ang error at ginamit ang status label dynamically
-          'Status: ${_getBadgeLabel(statusStr)}',
+        title: Text(
+          widget.member.name,
           style: const TextStyle(
-            color: AppColors.bodyText,
-            fontSize: 12,
+            color: AppColors.charcoal,
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        trailing: const Icon(
-          Icons.chevron_right_rounded,
-          color: AppColors.captionText,
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: _getBadgeColor().withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: _getBadgeColor().withOpacity(0.3)),
+            ),
+            child: Text(
+              _getBadgeLabel(),
+              style: TextStyle(
+                color: _getBadgeColor(),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
+        trailing: _buildTrailingAction(),
       ),
     );
   }

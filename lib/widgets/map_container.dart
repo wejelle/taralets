@@ -159,7 +159,11 @@ class _MapContainerState extends State<MapContainer>
                   builder: (context, child) {
                     List<Widget> markers = [];
 
-                    widget.members.asMap().forEach((idx, member) {
+                    // BAGO: Finilter out natin yung isCurrentUser (You/Jewelle) para walang duplicate
+                    final otherMembers =
+                        widget.members.where((m) => !m.isCurrentUser).toList();
+
+                    otherMembers.asMap().forEach((idx, member) {
                       double xOffset =
                           (idx % 2 == 0 ? 0.8 : -0.8) * (1 + (idx / 2) * 0.15);
                       double yOffset = (idx % 3 == 0 ? 0.75 : -0.75) *
@@ -179,11 +183,13 @@ class _MapContainerState extends State<MapContainer>
                         alignment: currentAlign,
                         child: _MemberMarker(
                             name: member.name.split(' ')[0],
-                            isMoving: true,
-                            color: AppColors.primary),
+                            isMoving: widget
+                                .isReady, // BAGO: Aandar lang if 4/4 ready
+                            color: member.avatarColor),
                       ));
                     });
 
+                    // Ito yung dedicated marker para sa'yo
                     Alignment startAlignYou = const Alignment(0.0, 0.85);
                     double progressYou = _userController!.value * 0.85;
                     Alignment currentAlignYou = _getOrthogonalAlignment(
@@ -306,12 +312,7 @@ class _RoutePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     Offset cornerYou = Offset(center.dx, youPos.dy);
-    _drawOrthogonalDashedLine(
-        canvas,
-        youPos,
-        cornerYou,
-        center,
-        paintYou,
+    _drawOrthogonalDashedLine(canvas, youPos, cornerYou, center, paintYou,
         isReady ? animationValue : 0);
   }
 
@@ -503,7 +504,8 @@ class _ClusterMarker extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+              BoxShadow(
+                  color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
             ],
           ),
           child: Text(

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import 'initialization_screen.dart';
@@ -8,83 +9,116 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Greeting
-              const Text('Hello, Traveler!',
-                  style: TextStyle(
-                      color: AppColors.charcoal,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5)),
-              const SizedBox(height: 8),
-              const Text('Ready for your next group travel?',
-                  style: TextStyle(color: AppColors.bodyText, fontSize: 14)),
-              const SizedBox(height: 40),
-
-              // Empty State (Wala pang trip)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white, // O AppColors.surface kung na-add mo na
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: const Column(
-                  children: [
-                    Icon(Icons.flight_takeoff_rounded,
-                        color: AppColors.captionText, size: 48),
-                    SizedBox(height: 16),
-                    Text('No Active Trips',
-                        style: TextStyle(
-                            color: AppColors.charcoal,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800)),
-                    SizedBox(height: 4),
-                    Text("You don't have any ongoing meetups right now.",
-                        textAlign: TextAlign.center,
-                        style:
-                            TextStyle(color: AppColors.bodyText, fontSize: 13)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Button: Create a Trip (Papunta sa Map/Initialization)
-              _buildActionCard(
-                context: context,
-                title: 'Plan a New Meetup',
-                subtitle: 'Set a location and target time',
-                icon: Icons.add_location_alt_rounded,
-                color: AppColors.primary,
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const InitializationScreen()));
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Button: Join a Trip (Room Code)
-              _buildActionCard(
-                context: context,
-                title: 'Join a Group',
-                subtitle: 'Enter a room code from a friend',
-                icon: Icons.meeting_room_rounded,
-                color: AppColors.secondary,
-                onTap: () => _showJoinDialog(context),
-              ),
-            ],
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // ── GLOBAL THEME BACKGROUND ──
+          Positioned.fill(
+            child: Container(
+                decoration: const BoxDecoration(
+                    gradient: AppColors.globalThemeGradient)),
           ),
-        ),
+          Positioned(
+            top: -50,
+            right: -30,
+            child: CircleAvatar(
+                radius: 130, backgroundColor: Colors.white.withOpacity(0.35)),
+          ),
+          Positioned(
+            bottom: 100,
+            left: -60,
+            child: CircleAvatar(
+                radius: 110,
+                backgroundColor: AppColors.primaryLight.withOpacity(0.25)),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  const Text('Hello, Traveler!',
+                      style: TextStyle(
+                          color: AppColors.charcoal,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5)),
+                  const SizedBox(height: 8),
+                  const Text('Ready for your next group travel?',
+                      style: TextStyle(
+                          color: AppColors.bodyText,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 40),
+
+                  // Empty State
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.8), width: 1.5),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(Icons.flight_takeoff_rounded,
+                                color: AppColors.captionText, size: 52),
+                            SizedBox(height: 16),
+                            Text('No Active Trips',
+                                style: TextStyle(
+                                    color: AppColors.charcoal,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900)),
+                            SizedBox(height: 6),
+                            Text(
+                                "You don't have any ongoing meetups right now.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: AppColors.bodyText, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildActionCard(
+                    context: context,
+                    title: 'Plan a New Meetup',
+                    subtitle: 'Set a location and target time',
+                    icon: Icons.add_location_alt_rounded,
+                    color: AppColors.primary,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const InitializationScreen()));
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildActionCard(
+                    context: context,
+                    title: 'Join a Group',
+                    subtitle: 'Enter a room code from a friend',
+                    icon: Icons.meeting_room_rounded,
+                    color: AppColors.secondary,
+                    onTap: () => _showJoinDialog(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -98,48 +132,56 @@ class HomeScreen extends StatelessWidget {
       required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider),
-          boxShadow: [
-            BoxShadow(
-                color: color.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4))
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12)),
-              child: Icon(icon, color: color, size: 28),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                    color: color.withOpacity(0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4))
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          color: AppColors.charcoal,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: const TextStyle(
-                          color: AppColors.bodyText, fontSize: 12)),
-                ],
-              ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Icon(icon, color: color, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(
+                              color: AppColors.charcoal,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 4),
+                      Text(subtitle,
+                          style: const TextStyle(
+                              color: AppColors.bodyText,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    color: AppColors.captionText, size: 16),
+              ],
             ),
-            const Icon(Icons.arrow_forward_ios_rounded,
-                color: AppColors.captionText, size: 16),
-          ],
+          ),
         ),
       ),
     );
@@ -149,9 +191,10 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.white.withOpacity(0.95),
         title: const Text('Join Group',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+            style: TextStyle(
+                fontWeight: FontWeight.w900, color: AppColors.charcoal)),
         content: TextField(
           decoration: InputDecoration(
             hintText: 'Enter 6-digit Room Code',
@@ -159,12 +202,16 @@ class HomeScreen extends StatelessWidget {
             fillColor: Colors.white,
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.divider)),
+                borderSide: const BorderSide(color: AppColors.divider)),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel',
+                  style: TextStyle(
+                      color: AppColors.captionText,
+                      fontWeight: FontWeight.w700))),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -173,8 +220,11 @@ class HomeScreen extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white),
-            child: const Text('Join'),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10))),
+            child: const Text('Join',
+                style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),

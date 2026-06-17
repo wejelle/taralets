@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/map_container.dart';
 import '../widgets/alert_modal.dart';
-import '../screens/dashboard_screen.dart';
-import '../main.dart';
+import '../main.dart'; // Import para sa MainShell routing
 
 class InitializationScreen extends StatefulWidget {
   const InitializationScreen({super.key});
@@ -50,7 +49,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.charcoal,
+      backgroundColor: Colors.transparent, // BAGO: Para sumunod sa MainShell
       resizeToAvoidBottomInset: false,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -74,7 +73,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
                   child: Row(
                     children: [
                       GlassContainer(
-                        borderRadius: 14,
+                        borderRadius: 16,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 10),
                         child: const Row(
@@ -85,9 +84,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
                             SizedBox(width: 8),
                             Text('Set Meetup Point',
                                 style: TextStyle(
-                                    color: Colors.black87,
+                                    color: AppColors.charcoal,
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w700)),
+                                    fontWeight: FontWeight.w800)),
                           ],
                         ),
                       ),
@@ -96,15 +95,14 @@ class _InitializationScreenState extends State<InitializationScreen> {
                         onTap: () =>
                             setState(() => _alertVisible = !_alertVisible),
                         child: GlassContainer(
-                          borderRadius: 14,
+                          borderRadius: 16,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 10),
                           color: _alertVisible
-                              ? AppColors.urgent.withOpacity(0.75)
-                              : AppColors.urgent.withOpacity(0.15),
-                          borderColor: _alertVisible
-                              ? AppColors.urgent
-                              : AppColors.urgent.withOpacity(0.4),
+                              ? AppColors.urgent.withOpacity(0.85)
+                              : Colors.white.withOpacity(0.8),
+                          borderColor:
+                              _alertVisible ? AppColors.urgent : Colors.white,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -121,7 +119,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                       ? Colors.white
                                       : AppColors.urgent,
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ],
@@ -139,34 +137,36 @@ class _InitializationScreenState extends State<InitializationScreen> {
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                    bottom: MediaQuery.of(context).viewInsets.bottom +
+                        80), // BAGO: Dinagdagan ang bottom padding para iwas overlap sa nav
                 child: SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // MODULE 3.0: Trip Name Input
                         GlassContainer(
-                          borderRadius: 14,
+                          borderRadius: 16,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 2),
+                          color: Colors.white.withOpacity(0.85),
                           child: TextField(
                             controller: _groupNameController,
                             style: const TextStyle(
-                                color: Colors.black87,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700),
+                                color: AppColors.charcoal,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800),
                             decoration: const InputDecoration(
                               hintText: 'Enter Trip Name',
                               hintStyle: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600),
+                                  color: AppColors.captionText,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700),
                               border: InputBorder.none,
                               icon: Icon(Icons.flight_takeoff_rounded,
-                                  color: Colors.black54, size: 20),
+                                  color: AppColors.primary, size: 22),
                             ),
                           ),
                         ),
@@ -176,14 +176,15 @@ class _InitializationScreenState extends State<InitializationScreen> {
                         GestureDetector(
                           onTap: () => _selectTime(context),
                           child: GlassContainer(
-                            borderRadius: 14,
+                            borderRadius: 16,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
+                                horizontal: 16, vertical: 16),
+                            color: Colors.white.withOpacity(0.85),
                             child: Row(
                               children: [
                                 const Icon(Icons.access_time_rounded,
-                                    color: Colors.black54, size: 20),
-                                const SizedBox(width: 10),
+                                    color: AppColors.primary, size: 22),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     _targetArrivalTime == null
@@ -191,12 +192,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                         : 'Arrival Time: ${_targetArrivalTime!.format(context)}',
                                     style: TextStyle(
                                       color: _targetArrivalTime == null
-                                          ? Colors.black54
-                                          : Colors.black87,
+                                          ? AppColors.captionText
+                                          : AppColors.charcoal,
                                       fontSize: 14,
-                                      fontWeight: _targetArrivalTime == null
-                                          ? FontWeight.w600
-                                          : FontWeight.w700,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
@@ -208,14 +207,15 @@ class _InitializationScreenState extends State<InitializationScreen> {
 
                         // MODULE 3.0: Destination Pinning
                         GlassContainer(
-                          borderRadius: 14,
+                          borderRadius: 16,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                              horizontal: 16, vertical: 14),
+                          color: Colors.white.withOpacity(0.85),
                           child: Row(
                             children: [
                               const Icon(Icons.location_on_rounded,
-                                  color: Colors.black54, size: 20),
-                              const SizedBox(width: 10),
+                                  color: AppColors.primary, size: 22),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   _pinSet
@@ -223,12 +223,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                       : 'Search or tap map to pin…',
                                   style: TextStyle(
                                       color: _pinSet
-                                          ? Colors.black87
-                                          : Colors.black54,
+                                          ? AppColors.charcoal
+                                          : AppColors.captionText,
                                       fontSize: 14,
-                                      fontWeight: _pinSet
-                                          ? FontWeight.w700
-                                          : FontWeight.w600),
+                                      fontWeight: FontWeight.w800),
                                 ),
                               ),
                               if (_pinSet)
@@ -238,12 +236,12 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                     _pinnedLabel = 'Custom Pin';
                                   }),
                                   child: const Icon(Icons.close_rounded,
-                                      color: Colors.black54, size: 18),
+                                      color: AppColors.captionText, size: 20),
                                 ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
 
                         // Quick-pin suggestions
                         SingleChildScrollView(
@@ -266,7 +264,7 @@ class _InitializationScreenState extends State<InitializationScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
 
                         // Confirm button
                         SizedBox(
@@ -278,12 +276,17 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                     setState(() => _groupSessionVisible = true);
                                   }
                                 : null,
-                            child: GlassContainer(
-                              borderRadius: 14,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              color: (_pinSet && _targetArrivalTime != null)
-                                  ? AppColors.primary.withOpacity(0.85)
-                                  : Colors.white.withOpacity(0.25),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              decoration: BoxDecoration(
+                                  color: (_pinSet && _targetArrivalTime != null)
+                                      ? AppColors.primary
+                                      : Colors.white.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                      color: Colors.white.withOpacity(0.4),
+                                      width: 1.5)),
                               child: Center(
                                 child: Text(
                                   (_pinSet && _targetArrivalTime != null)
@@ -291,11 +294,11 @@ class _InitializationScreenState extends State<InitializationScreen> {
                                       : 'Complete Trip Info',
                                   style: TextStyle(
                                       fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w800,
                                       color: (_pinSet &&
                                               _targetArrivalTime != null)
                                           ? Colors.white
-                                          : Colors.black54),
+                                          : AppColors.captionText),
                                 ),
                               ),
                             ),
@@ -325,10 +328,10 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 right: 0,
                 bottom: 0,
                 child: SafeArea(
-                  top: false,
-                  child: UrgentDepartureModal(
-                      onDismiss: () => setState(() => _alertVisible = false)),
-                ),
+                    top: false,
+                    child: UrgentDepartureModal(
+                        onDismiss: () =>
+                            setState(() => _alertVisible = false))),
               ),
 
             // ── 5. GROUP COORDINATION OVERLAY ──
@@ -337,16 +340,14 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 child: GestureDetector(
                   onTap: () => setState(() => _groupSessionVisible = false),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                    child: Container(color: Colors.black.withOpacity(0.4)),
+                    filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                    child: Container(color: Colors.black.withOpacity(0.5)),
                   ),
                 ),
               ),
             if (_groupSessionVisible)
               Positioned.fill(
-                child: Center(
-                  child: _buildGroupCoordinationPrototype(),
-                ),
+                child: Center(child: _buildGroupCoordinationPrototype()),
               ),
           ],
         ),
@@ -358,7 +359,6 @@ class _InitializationScreenState extends State<InitializationScreen> {
     final groupName = _groupNameController.text.isNotEmpty
         ? _groupNameController.text
         : 'Your Group';
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$groupName meetup point set: $_pinnedLabel 📍'),
@@ -376,113 +376,94 @@ class _InitializationScreenState extends State<InitializationScreen> {
       child: Material(
         color: Colors.transparent,
         child: GlassContainer(
-          borderRadius: 16,
-          padding: const EdgeInsets.all(20),
-          color: AppColors.background.withOpacity(0.95), // Clean off-white
-          borderColor: AppColors.cardBorder,
+          borderRadius: 20,
+          padding: const EdgeInsets.all(24),
+          color: Colors.white.withOpacity(0.9), // Clean glass popup
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
                 children: [
-                  Icon(Icons.group_rounded, color: AppColors.primary),
-                  SizedBox(width: 8),
-                  Text(
-                    'Group Coordination',
-                    style: TextStyle(
-                      color: AppColors.charcoal, // Dark blue-gray
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  Icon(Icons.group_rounded, color: AppColors.primary, size: 28),
+                  SizedBox(width: 10),
+                  Text('Group Coordination',
+                      style: TextStyle(
+                          color: AppColors.charcoal,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900)),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 'Group Name: ${_groupNameController.text.isNotEmpty ? _groupNameController.text : 'Your Group'}',
                 style: const TextStyle(
                     color: AppColors.charcoal,
                     fontSize: 14,
-                    fontWeight: FontWeight.w700),
+                    fontWeight: FontWeight.w800),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Row(
                 children: [
                   const Icon(Icons.location_on_rounded,
-                      color: AppColors.primary, size: 14),
-                  const SizedBox(width: 4),
-                  Text(
-                    _pinnedLabel,
-                    style: const TextStyle(
-                        color: AppColors.bodyText,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600),
-                  ),
+                      color: AppColors.primary, size: 16),
+                  const SizedBox(width: 6),
+                  Text(_pinnedLabel,
+                      style: const TextStyle(
+                          color: AppColors.bodyText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
-              const Divider(height: 24, color: AppColors.divider),
-              const Text(
-                'Share Room Code',
-                style: TextStyle(
-                    color: AppColors.captionText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 6),
+              const Divider(height: 32, color: AppColors.divider),
+              const Text('Share Room Code',
+                  style: TextStyle(
+                      color: AppColors.captionText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text('Room code copied to clipboard! 📋'),
-                      backgroundColor: AppColors.teal,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
+                        content:
+                            const Text('Room code copied to clipboard! 📋'),
+                        backgroundColor: AppColors.teal,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12))),
                   );
                 },
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
-                      color: AppColors.primaryLight, // Highlight color
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        )
-                      ]),
+                    color: AppColors.primaryLight.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppColors.primary.withOpacity(0.3), width: 1.5),
+                  ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'PHX-92A',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 22,
-                          letterSpacing: 4,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+                      Text('PHX-92A',
+                          style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 24,
+                              letterSpacing: 6,
+                              fontWeight: FontWeight.w900)),
                       Icon(Icons.copy_rounded,
-                          color: AppColors.primary, size: 20),
+                          color: AppColors.primary, size: 22),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Live Member List',
-                style: TextStyle(
-                    color: AppColors.captionText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-              ),
+              const SizedBox(height: 24),
+              const Text('Live Member List',
+                  style: TextStyle(
+                      color: AppColors.captionText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               _buildMemberRow(
                   name: 'You (Host)',
@@ -492,9 +473,8 @@ class _InitializationScreenState extends State<InitializationScreen> {
                   statusColor: AppColors.teal,
                   eta: 'ETA: 15 mins'),
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Divider(height: 1, color: AppColors.divider),
-              ),
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(height: 1, color: AppColors.divider)),
               _buildMemberRow(
                   name: 'Denanajewaig',
                   status: 'On the way',
@@ -503,9 +483,8 @@ class _InitializationScreenState extends State<InitializationScreen> {
                   statusColor: AppColors.urgent,
                   eta: 'ETA: 22 mins'),
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Divider(height: 1, color: AppColors.divider),
-              ),
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(height: 1, color: AppColors.divider)),
               _buildMemberRow(
                   name: 'Waiting for others...',
                   status: 'Pending',
@@ -513,11 +492,14 @@ class _InitializationScreenState extends State<InitializationScreen> {
                   iconColor: AppColors.captionText,
                   statusColor: AppColors.captionText,
                   eta: '--'),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
+
+              // Confirm Start Button
               SizedBox(
                 width: double.infinity,
                 child: GestureDetector(
                   onTap: () {
+                    // Start navigation logic
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -532,49 +514,36 @@ class _InitializationScreenState extends State<InitializationScreen> {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.secondary],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
+                            color: AppColors.primary.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4))
                       ],
                     ),
                     child: const Center(
-                      child: Text(
-                        'Start Group Sync',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800),
-                      ),
+                      child: Text('Start Group Sync',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900)),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               Center(
                 child: GestureDetector(
                   onTap: () => setState(() => _groupSessionVisible = false),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Cancel',
+                  child: const Text('Cancel',
                       style: TextStyle(
-                        color: AppColors.bodyText,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                          color: AppColors.captionText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700)),
                 ),
               )
             ],
@@ -584,63 +553,51 @@ class _InitializationScreenState extends State<InitializationScreen> {
     );
   }
 
-  Widget _buildMemberRow({
-    required String name,
-    required String status,
-    required IconData icon,
-    required Color iconColor,
-    required Color statusColor,
-    required String eta,
-  }) {
+  Widget _buildMemberRow(
+      {required String name,
+      required String status,
+      required IconData icon,
+      required Color iconColor,
+      required Color statusColor,
+      required String eta}) {
     return Row(
       children: [
         CircleAvatar(
-          radius: 16,
-          backgroundColor: AppColors.cardBorder,
-          child: Icon(icon, size: 18, color: iconColor),
-        ),
+            radius: 16,
+            backgroundColor: AppColors.cardBorder,
+            child: Icon(icon, size: 18, color: iconColor)),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  color: AppColors.charcoal,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              Text(name,
+                  style: const TextStyle(
+                      color: AppColors.charcoal,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800)),
               const SizedBox(height: 2),
-              Text(
-                eta,
-                style: const TextStyle(
-                  color: AppColors.captionText,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(eta,
+                  style: const TextStyle(
+                      color: AppColors.captionText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600)),
             ],
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: statusColor.withOpacity(0.3)),
-          ),
-          child: Text(
-            status,
-            style: TextStyle(
-              color: statusColor == AppColors.captionText
-                  ? AppColors.bodyText
-                  : statusColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+              color: statusColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: statusColor.withOpacity(0.3))),
+          child: Text(status,
+              style: TextStyle(
+                  color: statusColor == AppColors.captionText
+                      ? AppColors.bodyText
+                      : statusColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800)),
         ),
       ],
     );
@@ -657,14 +614,14 @@ class _QuickPin extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: GlassContainer(
-        borderRadius: 10,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        color: Colors.white.withOpacity(0.35),
+        borderRadius: 12,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        color: Colors.white.withOpacity(0.8),
         child: Text(label,
             style: const TextStyle(
-                color: Colors.black87,
+                color: AppColors.charcoal,
                 fontSize: 12,
-                fontWeight: FontWeight.w700)),
+                fontWeight: FontWeight.w800)),
       ),
     );
   }
@@ -695,10 +652,10 @@ class GlassContainer extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: color ?? Colors.white.withOpacity(0.25),
+            color: color ?? Colors.white.withOpacity(0.6),
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
-              color: borderColor ?? Colors.white.withOpacity(0.4),
+              color: borderColor ?? Colors.white.withOpacity(0.8),
               width: 1.5,
             ),
           ),
