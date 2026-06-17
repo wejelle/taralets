@@ -34,24 +34,18 @@ class _MapContainerState extends State<MapContainer>
   @override
   void initState() {
     super.initState();
-    // Makina para sa dashed lines (umaandar palagi)
     _lineController =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
-
-    // Makina para sa ibang members (tuloy-tuloy na umaandar patungo sa dest)
     _othersController =
         AnimationController(vsync: this, duration: const Duration(seconds: 45));
-
-    // Makina para lang sayo ("You")
     _userController =
         AnimationController(vsync: this, duration: const Duration(seconds: 45));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _lineController?.repeat();
-        _othersController?.forward(); // Yung iba umaandar na
-        if (widget.isReady)
-          _userController?.forward(); // Ikaw aandar lang pag Ready
+        _othersController?.forward();
+        if (widget.isReady) _userController?.forward();
       }
     });
   }
@@ -61,9 +55,9 @@ class _MapContainerState extends State<MapContainer>
     super.didUpdateWidget(oldWidget);
     if (widget.isReady != oldWidget.isReady) {
       if (widget.isReady) {
-        _userController?.forward(); // Tuloy ang andar mo
+        _userController?.forward();
       } else {
-        _userController?.stop(); // HIHINTO lang kung nasaan ka (hindi babalik)
+        _userController?.stop();
       }
     }
   }
@@ -127,7 +121,19 @@ class _MapContainerState extends State<MapContainer>
               ),
             ),
 
-            // ── 2. ANIMATED ORTHOGONAL ROUTE LINES ──
+            // ── 2. SIMULATED CLUSTERED PINS (Prototype) ──
+            const Positioned(
+              top: 40,
+              right: 50,
+              child: _ClusterMarker(count: 3, label: 'Cafes'),
+            ),
+            const Positioned(
+              bottom: 60,
+              left: 30,
+              child: _ClusterMarker(count: 5, label: 'Activities'),
+            ),
+
+            // ── 3. ANIMATED ORTHOGONAL ROUTE LINES ──
             if (_lineController != null)
               AnimatedBuilder(
                   animation: _lineController!,
@@ -144,9 +150,8 @@ class _MapContainerState extends State<MapContainer>
 
             if (widget.showCrosshairs) _Crosshairs(),
 
-            // ── 3. GUMAGALAW NA MEMBERS (Avatars) ──
+            // ── 4. GUMAGALAW NA MEMBERS (Avatars) ──
             if (_othersController != null && _userController != null)
-              // FIX: Ginawang Positioned.fill para hindi mag-collapse at lumitaw ang ulo nila
               Positioned.fill(
                 child: AnimatedBuilder(
                   animation:
@@ -154,7 +159,6 @@ class _MapContainerState extends State<MapContainer>
                   builder: (context, child) {
                     List<Widget> markers = [];
 
-                    // A. Ibang Members (Umaandar palagi)
                     widget.members.asMap().forEach((idx, member) {
                       double xOffset =
                           (idx % 2 == 0 ? 0.8 : -0.8) * (1 + (idx / 2) * 0.15);
@@ -180,9 +184,7 @@ class _MapContainerState extends State<MapContainer>
                       ));
                     });
 
-                    // B. Ikaw / "You" (Hihinto kapag hindi ready)
-                    Alignment startAlignYou = const Alignment(
-                        0.0, 0.85); // Nasa bandang gitna-ibaba ka magsisimula
+                    Alignment startAlignYou = const Alignment(0.0, 0.85);
                     double progressYou = _userController!.value * 0.85;
                     Alignment currentAlignYou = _getOrthogonalAlignment(
                         startAlignYou, Alignment.center, progressYou, true);
@@ -194,9 +196,7 @@ class _MapContainerState extends State<MapContainer>
                           isMoving: widget.isReady,
                           color: widget.isReady
                               ? AppColors.teal
-                              : AppColors
-                                  .urgent // Teal pag ready, Red pag nakahinto
-                          ),
+                              : AppColors.urgent),
                     ));
 
                     return Stack(children: markers);
@@ -265,7 +265,6 @@ class _RoutePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
 
-    // Linya para sa ibang members
     for (int idx = 0; idx < members.length; idx++) {
       double xOffset = (idx % 2 == 0 ? 0.8 : -0.8) * (1 + (idx / 2) * 0.15);
       double yOffset = (idx % 3 == 0 ? 0.75 : -0.75) * (1 + (idx / 3) * 0.15);
@@ -292,7 +291,6 @@ class _RoutePainter extends CustomPainter {
           canvas, memberPos, corner, center, paint, animationValue);
     }
 
-    // Linya para sayo ("You")
     Alignment startAlignYou = const Alignment(0.0, 0.85);
     final youPos = Offset(
       (startAlignYou.x + 1) * size.width / 2,
@@ -314,9 +312,7 @@ class _RoutePainter extends CustomPainter {
         cornerYou,
         center,
         paintYou,
-        isReady
-            ? animationValue
-            : 0); // Titigil ang animation ng dash mo pag di ready
+        isReady ? animationValue : 0);
   }
 
   void _drawOrthogonalDashedLine(Canvas canvas, Offset p1, Offset corner,
@@ -367,7 +363,6 @@ class _RoutePainter extends CustomPainter {
   }
 }
 
-// FIX: Ginawang mas flexible ang Marker para ma-customize ang kulay ng "You" at ng "Others"
 class _MemberMarker extends StatelessWidget {
   final String name;
   final bool isMoving;
@@ -485,6 +480,51 @@ class _Crosshairs extends StatelessWidget {
                   shape: BoxShape.circle)),
         ],
       ),
+    );
+  }
+}
+
+// BAGO: Widget para sa Simulated Clustered Pins
+class _ClusterMarker extends StatelessWidget {
+  final int count;
+  final String label;
+
+  const _ClusterMarker({required this.count, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.teal.withOpacity(0.9), // Cluster color
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: const [
+              BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+            ],
+          ),
+          child: Text(
+            count.toString(),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(4)),
+          child: Text(label,
+              style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87)),
+        )
+      ],
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:ui'; // 1. Import para sa ImageFilter.blur
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../models/poi.dart';
@@ -12,22 +12,22 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
-  String _selectedCategory = 'All';
-  final List<String> _categories = ['All', 'Budget', 'Cafes', 'Activities'];
+  final Set<String> _selectedPreferences = {};
+  final List<String> _availablePreferences = ['Budget', 'Food', 'Drinks', 'Chill', 'Games', 'Outdoor', 'Indoor', 'Nightlife'];
   final Set<String> _itinerary = {};
 
   List<POI> get _filtered {
-    if (_selectedCategory == 'All') return POI.mockPOIs;
-    return POI.mockPOIs.where((p) => p.category == _selectedCategory).toList();
+    if (_selectedPreferences.isEmpty) return POI.mockPOIs;
+    return POI.mockPOIs.where((p) {
+      return _selectedPreferences.any((pref) => p.preferences.contains(pref));
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Inalis na natin ang solid background, ginamitan ng Stack para sa gradient
       body: Stack(
         children: [
-          // ── Background Gradient ───────────────────────────────────────
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -40,21 +40,19 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header ────────────────────────────────────────────────
                 const Padding(
                   padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Discover Places',
+                        'Discover & Filter',
                         style: TextStyle(
-                          color: Colors.black87, // Inadjust para sa glass bg
+                          color: Colors.black87,
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
@@ -62,7 +60,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        'Near Eastwood City Mall, QC',
+                        'Customize your group\'s vibe',
                         style: TextStyle(color: Colors.black54, fontSize: 13),
                       ),
                     ],
@@ -70,19 +68,26 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Category chips (Glassified) ───────────────────────────
                 SizedBox(
                   height: 40,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
+                    itemCount: _availablePreferences.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (ctx, i) {
-                      final cat = _categories[i];
-                      final active = cat == _selectedCategory;
+                      final pref = _availablePreferences[i];
+                      final active = _selectedPreferences.contains(pref);
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedCategory = cat),
+                        onTap: () {
+                          setState(() {
+                            if (active) {
+                              _selectedPreferences.remove(pref);
+                            } else {
+                              _selectedPreferences.add(pref);
+                            }
+                          });
+                        },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: BackdropFilter(
@@ -92,7 +97,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 18, vertical: 10),
                               decoration: BoxDecoration(
-                                // Ginawang semi-transparent ang active state
                                 color: active
                                     ? AppColors.primary.withOpacity(0.75)
                                     : Colors.white.withOpacity(0.3),
@@ -104,14 +108,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                 ),
                               ),
                               child: Text(
-                                cat,
+                                pref,
                                 style: TextStyle(
                                   color: active ? Colors.white : Colors.black87,
                                   fontSize: 13,
                                   fontWeight: active
                                       ? FontWeight.w700
-                                      : FontWeight
-                                          .w600, // Dinagdagan ng unting weight ang inactive
+                                      : FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -123,7 +126,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
                 const SizedBox(height: 4),
 
-                // ── POI list ──────────────────────────────────────────────
                 Expanded(
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -157,14 +159,14 @@ class _POICard extends StatelessWidget {
   final bool inItinerary;
   final VoidCallback onAddToggle;
 
-  const _POICard(
-      {required this.poi,
-      required this.inItinerary,
-      required this.onAddToggle});
+  const _POICard({
+    required this.poi,
+    required this.inItinerary,
+    required this.onAddToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Ipinalit natin ang GlassContainer dito
     return GlassContainer(
       borderRadius: 18,
       padding: const EdgeInsets.all(16),
@@ -176,7 +178,7 @@ class _POICard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15), // Glassy tint
+                  color: AppColors.primary.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(poi.category,
@@ -191,7 +193,7 @@ class _POICard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: poi.isOpen
                       ? AppColors.teal.withOpacity(0.15)
-                      : AppColors.danger.withOpacity(0.15), // Glassy tint
+                      : AppColors.danger.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -253,7 +255,6 @@ class _POICard extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 decoration: BoxDecoration(
-                  // Medyo ibinaba ang opacity ng button para sumarap sa mata
                   color: inItinerary
                       ? AppColors.teal.withOpacity(0.85)
                       : AppColors.primary.withOpacity(0.85),
@@ -288,7 +289,6 @@ class _POICard extends StatelessWidget {
   }
 }
 
-// ── GlassContainer Widget (Ilagay mo na lang sa hiwalay na file kung gusto mo) ─
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double borderRadius;

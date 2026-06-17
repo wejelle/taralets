@@ -8,7 +8,9 @@ class POI {
   final int reviewCount;
   final String priceRange;
   final bool isOpen;
+  final List<String> preferences;
 
+  // SIGURADUHIN NA NASA LOOB ITO NG CONSTRUCTOR
   const POI({
     required this.id,
     required this.name,
@@ -19,6 +21,7 @@ class POI {
     required this.reviewCount,
     required this.priceRange,
     required this.isOpen,
+    required this.preferences, // <- Ito yung hinahanap ng error
   });
 
   static const List<POI> mockPOIs = [
@@ -32,6 +35,7 @@ class POI {
       reviewCount: 1284,
       priceRange: '₱₱',
       isOpen: true,
+      preferences: ['Outdoor', 'Nightlife', 'Chill'],
     ),
     POI(
       id: 'p2',
@@ -43,6 +47,7 @@ class POI {
       reviewCount: 876,
       priceRange: '₱',
       isOpen: true,
+      preferences: ['Drinks', 'Budget', 'Chill'],
     ),
     POI(
       id: 'p3',
@@ -54,6 +59,7 @@ class POI {
       reviewCount: 2103,
       priceRange: '₱',
       isOpen: true,
+      preferences: ['Food', 'Budget', 'Quick'],
     ),
     POI(
       id: 'p4',
@@ -65,6 +71,7 @@ class POI {
       reviewCount: 645,
       priceRange: '₱₱',
       isOpen: true,
+      preferences: ['Games', 'Indoor', 'Loud'],
     ),
     POI(
       id: 'p5',
@@ -76,6 +83,7 @@ class POI {
       reviewCount: 432,
       priceRange: '₱₱',
       isOpen: false,
+      preferences: ['Drinks', 'Chill', 'Indoor'],
     ),
     POI(
       id: 'p6',
@@ -87,6 +95,7 @@ class POI {
       reviewCount: 918,
       priceRange: '₱₱',
       isOpen: true,
+      preferences: ['Games', 'Indoor', 'Esports'],
     ),
   ];
 }

@@ -8,6 +8,7 @@ import 'screens/discover_screen.dart';
 import 'screens/timeline_screen.dart';
 import 'screens/initialization_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/profile_screen.dart'; // BAGO: In-import natin ang Profile Screen
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -106,6 +107,7 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  // BAGO: Idinagdag ang ProfileScreen() sa dulo ng listahan (Index 5)
   List<Widget> get _screens => [
         DashboardScreen(
           tripName: widget.tripName,
@@ -125,6 +127,7 @@ class _MainShellState extends State<MainShell> {
           reportedDelayMinutes: _reportedDelayMinutes,
         ),
         const InitializationScreen(),
+        const ProfileScreen(), // <- ITO ANG BAGONG SCREEN
       ];
 
   @override
@@ -178,6 +181,13 @@ class _MainShellState extends State<MainShell> {
                     index: 4,
                     current: _currentIndex,
                     onTap: _onTap),
+                // BAGO: Profile Navigation Item
+                _NavItem(
+                    icon: Icons.person_outline_rounded,
+                    label: 'Profile',
+                    index: 5, // Pang-anim na tab
+                    current: _currentIndex,
+                    onTap: _onTap),
               ],
             ),
           ),
@@ -207,17 +217,18 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool active = index == current;
+    // BAGO: Pinaliit natin nang kaunti ang width para magkasya ang 6 items
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        width: 58, 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: active
                     ? AppColors.primary.withOpacity(0.12)
@@ -226,7 +237,7 @@ class _NavItem extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                size: 22,
+                size: 20, // Pinaliit nang konti ang icon
                 color: active
                     ? AppColors.primary
                     : AppColors.charcoal.withOpacity(0.4),
@@ -236,12 +247,13 @@ class _NavItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9, // Pinaliit nang konti ang text para sa 6 items
                 fontWeight: active ? FontWeight.w700 : FontWeight.w400,
                 color: active
                     ? AppColors.primary
                     : AppColors.charcoal.withOpacity(0.4),
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
