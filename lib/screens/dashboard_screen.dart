@@ -144,6 +144,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
+            // ── MAP CONTAINER ──
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
@@ -156,6 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
+            // ── PILLS ROW ──
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -215,7 +217,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(width: 10),
 
-                    // FIX: Ang button ay magiiba ang kulay kapag may existing delay para obvious!
                     Expanded(
                       child: GestureDetector(
                         onTap: _showDelayModal,
@@ -260,6 +261,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
+            // ── HEADER: GROUP MEMBERS ──
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
@@ -279,6 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
+            // ── LIST: GROUP MEMBERS ──
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
               sliver: SliverList(
@@ -428,9 +431,10 @@ class _DelaySelectorModalState extends State<_DelaySelectorModal> {
                 ),
                 child: Text('Confirm Add Delay (+$_selectedMins mins)',
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800)),
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    )),
               ),
             ),
           ],
@@ -527,37 +531,39 @@ class _SabayPill extends StatelessWidget {
         color: AppColors.teal,
         borderRadius: BorderRadius.circular(14),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Sabay-Sabay',
-              style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '$count/$total',
-                  style: GoogleFonts.jetBrainsMono(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800),
-                ),
-                const TextSpan(
-                  text: ' ready',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800),
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Sabay-Sabay',
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$count/$total',
+                    style: GoogleFonts.jetBrainsMono(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800),
+                  ),
+                  const TextSpan(
+                    text: ' ready',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

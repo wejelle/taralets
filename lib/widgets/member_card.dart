@@ -1,106 +1,106 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
 import '../models/group_member.dart';
+import '../constants/colors.dart';
 
 class MemberCard extends StatelessWidget {
   final GroupMember member;
+
   const MemberCard({super.key, required this.member});
+
+  // Ligtas na String processing para maiwasan ang enum check errors
+  String _getStatusString() {
+    return member.status.toString().split('.').last.toLowerCase();
+  }
+
+  // Nagbibigay ng tamang kulay depende sa text value ng status
+  Color _getBadgeColor(String statusStr) {
+    if (statusStr.contains('near')) {
+      return Colors.green; // Green kung malapit
+    } else if (statusStr.contains('arrive')) {
+      return Colors.amber; // Yellow/Amber kung dumating na
+    } else {
+      return Colors.red;   // Red kung malayo o on the way
+    }
+  }
+
+  // Nagbibigay ng malinis na text display para sa badge UI
+  String _getBadgeLabel(String statusStr) {
+    if (statusStr.contains('near')) return 'Near';
+    if (statusStr.contains('arrive')) return 'Arrived';
+    return 'Far';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-        boxShadow: [
-          BoxShadow(color: AppColors.charcoal.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+    final statusStr = _getStatusString();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.divider),
       ),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: member.avatarColor,
-              shape: BoxShape.circle,
+      color: Colors.white,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          backgroundColor: AppColors.primary.withOpacity(0.1),
+          child: Text(
+            member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
             ),
-            child: Center(
+          ),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              member.name,
+              style: const TextStyle(
+                color: AppColors.charcoal,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            
+            // ── COMPILED STATUS BADGE (GREEN / RED / YELLOW) ──
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _getBadgeColor(statusStr).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _getBadgeColor(statusStr),
+                  width: 1,
+                ),
+              ),
               child: Text(
-                member.avatarInitials,
-                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                _getBadgeLabel(statusStr),
+                style: TextStyle(
+                  color: _getBadgeColor(statusStr),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
+          ],
+        ),
+        subtitle: Text(
+          // Inalis ang .isReady para mawala ang error at ginamit ang status label dynamically
+          'Status: ${_getBadgeLabel(statusStr)}',
+          style: const TextStyle(
+            color: AppColors.bodyText,
+            fontSize: 12,
           ),
-          const SizedBox(width: 12),
-          // Name + location
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      member.name,
-                      style: const TextStyle(color: AppColors.charcoal, fontSize: 14, fontWeight: FontWeight.w700),
-                    ),
-                    if (member.isCurrentUser) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text('You', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, size: 13, color: AppColors.captionText),
-                    const SizedBox(width: 2),
-                    Expanded(
-                      child: Text(
-                        member.mockLocation,
-                        style: const TextStyle(color: AppColors.bodyText, fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${member.distanceKm.toStringAsFixed(1)} km',
-                      style: const TextStyle(color: AppColors.captionText, fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          // Departure badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: member.badgeBgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              member.departureBadgeLabel,
-              style: TextStyle(
-                color: member.badgeColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+        ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.captionText,
+        ),
       ),
     );
   }
