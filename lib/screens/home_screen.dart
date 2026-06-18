@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import 'initialization_screen.dart';
@@ -9,116 +8,93 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // ── GLOBAL THEME BACKGROUND ──
-          Positioned.fill(
-            child: Container(
-                decoration: const BoxDecoration(
-                    gradient: AppColors.globalThemeGradient)),
-          ),
-          Positioned(
-            top: -50,
-            right: -30,
-            child: CircleAvatar(
-                radius: 130, backgroundColor: Colors.white.withOpacity(0.35)),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -60,
-            child: CircleAvatar(
-                radius: 110,
-                backgroundColor: AppColors.primaryLight.withOpacity(0.25)),
-          ),
+      // Malinis na background na kapareho ng sa Initialization Screen
+      backgroundColor: const Color(0xFFF7F9FA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              const Text('Hello, Traveler!',
+                  style: TextStyle(
+                      color: AppColors.charcoal,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5)),
+              const SizedBox(height: 8),
+              const Text('Ready for your next group travel?',
+                  style: TextStyle(
+                      color: AppColors.bodyText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600)),
+              const SizedBox(height: 40),
 
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  const Text('Hello, Traveler!',
-                      style: TextStyle(
-                          color: AppColors.charcoal,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5)),
-                  const SizedBox(height: 8),
-                  const Text('Ready for your next group travel?',
-                      style: TextStyle(
-                          color: AppColors.bodyText,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 40),
-
-                  // Empty State
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.8), width: 1.5),
-                        ),
-                        child: const Column(
-                          children: [
-                            Icon(Icons.flight_takeoff_rounded,
-                                color: AppColors.captionText, size: 52),
-                            SizedBox(height: 16),
-                            Text('No Active Trips',
-                                style: TextStyle(
-                                    color: AppColors.charcoal,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900)),
-                            SizedBox(height: 6),
-                            Text(
-                                "You don't have any ongoing meetups right now.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: AppColors.bodyText, fontSize: 14)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  _buildActionCard(
-                    context: context,
-                    title: 'Plan a New Meetup',
-                    subtitle: 'Set a location and target time',
-                    icon: Icons.add_location_alt_rounded,
-                    color: AppColors.primary,
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const InitializationScreen()));
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildActionCard(
-                    context: context,
-                    title: 'Join a Group',
-                    subtitle: 'Enter a room code from a friend',
-                    icon: Icons.meeting_room_rounded,
-                    color: AppColors.secondary,
-                    onTap: () => _showJoinDialog(context),
-                  ),
-                ],
+              // ── Modern, Solid Empty State Card ──
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border:
+                      Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 4))
+                  ],
+                ),
+                child: const Column(
+                  children: [
+                    Icon(Icons.flight_takeoff_rounded,
+                        color: AppColors.captionText, size: 52),
+                    SizedBox(height: 16),
+                    Text('No Active Trips',
+                        style: TextStyle(
+                            color: AppColors.charcoal,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900)),
+                    SizedBox(height: 6),
+                    Text("You don't have any ongoing meetups right now.",
+                        textAlign: TextAlign.center,
+                        style:
+                            TextStyle(color: AppColors.bodyText, fontSize: 14)),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: 32),
+
+              // ── Action Cards ──
+              _buildActionCard(
+                context: context,
+                title: 'Plan a New Meetup',
+                subtitle: 'Set a location and target time',
+                icon: Icons.add_location_alt_rounded,
+                color: AppColors.primary,
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const InitializationScreen()));
+                },
+              ),
+              const SizedBox(height: 16),
+
+              _buildActionCard(
+                context: context,
+                title: 'Join a Group',
+                subtitle: 'Enter a room code from a friend',
+                icon: Icons.meeting_room_rounded,
+                color: AppColors
+                    .secondary, // Siguraduhing may AppColors.secondary ka, kung wala, pwede mong gawing AppColors.primaryLight
+                onTap: () => _showJoinDialog(context),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -132,56 +108,50 @@ class HomeScreen extends StatelessWidget {
       required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                    color: color.withOpacity(0.1),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4))
-              ],
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+                color: color.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4))
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: color, size: 28),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Icon(icon, color: color, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style: const TextStyle(
-                              color: AppColors.charcoal,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900)),
-                      const SizedBox(height: 4),
-                      Text(subtitle,
-                          style: const TextStyle(
-                              color: AppColors.bodyText,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios_rounded,
-                    color: AppColors.captionText, size: 16),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          color: AppColors.charcoal,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          color: AppColors.bodyText,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
-          ),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                color: AppColors.captionText, size: 16),
+          ],
         ),
       ),
     );
@@ -202,7 +172,9 @@ class HomeScreen extends StatelessWidget {
             fillColor: Colors.white,
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.divider)),
+                borderSide: const BorderSide(
+                    color: AppColors
+                        .divider)), // Kung wala ang AppColors.divider, pwede itong const Color(0xFFE5E7EB)
           ),
         ),
         actions: [

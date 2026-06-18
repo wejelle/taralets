@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../main.dart'; // Para ma-access ang MainShell natin
 import 'register_screen.dart';
+import 'home_screen.dart'; // Idagdag ito para ma-access ang HomeScreen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,7 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          // BAGO: Diretso na sa MainShell para seamless ang flow!
+          // Ibalik sa MainShell. Dahil _currentIndex = 0 sa MainShell,
+          // sa HomeScreen pa rin ang labas nito pero may bottom nav na!
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MainShell()),

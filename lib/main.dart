@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'constants/colors.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/invite_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/discover_screen.dart';
 import 'screens/timeline_screen.dart';
 import 'screens/initialization_screen.dart';
@@ -35,7 +36,7 @@ class TaraletsApp extends StatelessWidget {
           background: AppColors.background,
         ),
         scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.plusJakartaSansTextTheme(), 
+        textTheme: GoogleFonts.plusJakartaSansTextTheme(),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: AppColors.charcoal,
@@ -107,8 +108,10 @@ class _MainShellState extends State<MainShell> {
         content: Text(_isReady
             ? 'You are now on your way! 🚗'
             // ── Pinalitan ang "Pending" ng mas akmang mensahe ──
-            : 'Travel status canceled. You are back on standby.'), 
-        backgroundColor: _isReady ? AppColors.teal : AppColors.captionText, // Iba na rin ang kulay pag cancel
+            : 'Travel status canceled. You are back on standby.'),
+        backgroundColor: _isReady
+            ? AppColors.teal
+            : AppColors.captionText, // Iba na rin ang kulay pag cancel
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -117,6 +120,7 @@ class _MainShellState extends State<MainShell> {
   }
 
   List<Widget> get _screens => [
+        const HomeScreen(),
         DashboardScreen(
           tripName: widget.tripName,
           location: widget.location,
@@ -128,8 +132,8 @@ class _MainShellState extends State<MainShell> {
           onToggleReady: _toggleReady,
         ),
         const InviteScreen(),
-        const InitializationScreen(), 
-        const DiscoverScreen(),       
+        const InitializationScreen(),
+        const DiscoverScreen(),
         TimelineScreen(
           tripName: widget.tripName,
           location: widget.location,
@@ -149,57 +153,103 @@ class _MainShellState extends State<MainShell> {
         index: _currentIndex,
         children: _screens,
       ),
-      extendBody: true, 
+      extendBody: true,
       bottomNavigationBar: SafeArea(
-        child: Container(
-          height: 66, // Standard height para sa navigation bar
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(34),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.charcoal.withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              )
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _NavBarIcon(
-                icon: Icons.home_rounded,
-                isSelected: _currentIndex == 0,
-                onTap: () => _onTap(0),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            // ── STANDARD NAVIGATION BAR (6 TABS) ──
+            Container(
+              height: 66,
+              margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(34),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.charcoal.withOpacity(0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  )
+                ],
               ),
-              _NavBarIcon(
-                icon: Icons.group_add_rounded,
-                isSelected: _currentIndex == 1,
-                onTap: () => _onTap(1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Kaliwa (Indices 0, 1, 2)
+                  _NavBarIcon(
+                    icon: Icons.home_rounded, // Home
+                    isSelected: _currentIndex == 0,
+                    onTap: () => _onTap(0),
+                  ),
+                  _NavBarIcon(
+                    icon: Icons.dashboard_rounded, // Dashboard
+                    isSelected: _currentIndex == 1,
+                    onTap: () => _onTap(1),
+                  ),
+                  _NavBarIcon(
+                    icon: Icons.person_add_rounded, // Invite
+                    isSelected: _currentIndex == 2,
+                    onTap: () => _onTap(2),
+                  ),
+
+                  // ── SPACE PARA SA FLOATING BUTTON ──
+                  const SizedBox(width: 60),
+
+                  // Kanan (Indices 4, 5, 6)
+                  _NavBarIcon(
+                    icon: Icons.explore_rounded, // Discover (Map)
+                    isSelected: _currentIndex == 4,
+                    onTap: () => _onTap(4),
+                  ),
+                  _NavBarIcon(
+                    icon: Icons.timeline_rounded, // Timeline
+                    isSelected: _currentIndex == 5,
+                    onTap: () => _onTap(5),
+                  ),
+                  _NavBarIcon(
+                    icon: Icons.person_rounded, // Profile
+                    isSelected: _currentIndex == 6,
+                    onTap: () => _onTap(6),
+                  ),
+                ],
               ),
-              _NavBarIcon(
-                icon: Icons.add_location_alt_rounded,
-                isSelected: _currentIndex == 2,
-                onTap: () => _onTap(2),
+            ),
+
+            // ── FLOATING BUTTON (Initialization Screen - Index 3) ──
+            Positioned(
+              bottom: 44, // Inaangat natin para lumutang sa ibabaw ng container
+              child: GestureDetector(
+                onTap: () => _onTap(3), // Mapupunta sa InitializationScreen
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 4, // Nagbibigay ng clean cutout effect
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons
+                        .add_rounded, // Pwede mo rin palitan ng flight_takeoff_rounded
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
               ),
-              _NavBarIcon(
-                icon: Icons.map_rounded,
-                isSelected: _currentIndex == 3,
-                onTap: () => _onTap(3),
-              ),
-              _NavBarIcon(
-                icon: Icons.timeline_rounded,
-                isSelected: _currentIndex == 4,
-                onTap: () => _onTap(4),
-              ),
-              _NavBarIcon(
-                icon: Icons.person_rounded,
-                isSelected: _currentIndex == 5,
-                onTap: () => _onTap(5),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -228,8 +278,10 @@ class _NavBarIcon extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Icon(
           icon,
-          color: isSelected ? AppColors.primary : AppColors.captionText.withOpacity(0.6),
-          size: 26, 
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.captionText.withOpacity(0.6),
+          size: 26,
         ),
       ),
     );
