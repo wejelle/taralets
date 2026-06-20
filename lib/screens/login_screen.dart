@@ -24,11 +24,10 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          // Ibalik sa MainShell. Dahil _currentIndex = 0 sa MainShell,
-          // sa HomeScreen pa rin ang labas nito pero may bottom nav na!
+          // BAGO: Diretso na sa MainShell para seamless ang flow!
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainShell()),
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         }
       });
